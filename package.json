@@ -1,0 +1,31 @@
+{
+  "name": "career-adaptive-course-planner",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "node server/index.js",
+    "dev:all": "concurrently \"npm:dev\" \"npm:server\"",
+    "db:migrate": "node server/data/migrate.js",
+    "ai:test-connection": "node server/scripts/test-ai-connection.js",
+    "ai:list-models": "node server/scripts/list-models.js",
+    "optimizer:benchmark": "node server/optimizer/benchmark.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.0",
+    "concurrently": "^8.2.2",
+    "vitest": "^2.1.4"
+  }
+}

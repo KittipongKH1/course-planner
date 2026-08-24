@@ -1,0 +1,58 @@
+:root {
+  /* Surfaces */
+  --bg-canvas: #0a0f1c;
+  --bg-surface-1: #131b2e;
+  --bg-surface-2: #1b2438;
+  --bg-surface-3: #232f47;
+  --border-subtle: #2a3650;
+  --border-strong: #3a4a6b;
+
+  /* Text */
+  --text-primary: #eef1f8;
+  --text-secondary: #a4b0c7;
+  --text-muted: #6b7793;
+
+  /* Brand / semantic */
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-soft: rgba(99, 102, 241, 0.16);
+  --info: #38bdf8;
+  --info-soft: rgba(56, 189, 248, 0.14);
+  --success: #10b981;
+  --success-soft: rgba(16, 185, 129, 0.14);
+  --warning: #f59e0b;
+  --warning-soft: rgba(245, 158, 11, 0.14);
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.14);
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  /* Shadow */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+
+  /* Type scale */
+  --font-sans: 'Sarabun', 'Noto Sans Thai', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+}
