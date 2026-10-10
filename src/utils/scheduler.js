@@ -196,7 +196,7 @@ export function electiveWarnings({ tracks, electiveSource, electiveCreditTotal, 
     warnings.push({
       term: null,
       type: 'filled',
-      message: `วิชาเลือกของ${tracks.map((t) => TRACKS[t].label).join(' + ')}มีไม่พอสำหรับช่องวิชาเลือกในแผน — ระบบเติมจากกลุ่มวิชาใกล้เคียง: ${filled.map((code) => `${code} (${COURSE_MAP[code].nameEn})`).join(', ')}`,
+      message: `วิชาเลือกของสาย ${tracks.map((t) => TRACKS[t].label).join(' + ')} มีไม่พอสำหรับช่องวิชาเลือกในแผน — ระบบเติมจากกลุ่มวิชาใกล้เคียง:${filled.map((code) => `${code} (${COURSE_MAP[code].nameEn})`).join(', ')}`,
     });
   }
   if (electiveCreditTotal < electiveCreditGoal) {

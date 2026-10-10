@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Activity, AlertTriangle, ChevronDown, Loader2 } from 'lucide-react';
 import { COURSES, COURSE_MAP, termLabel } from '../data/curriculum.js';
 import { saveTranscriptRemote } from '../services/api.js';
 import { forecastGraduation, generateOfficialPlan, unmetPrereqs } from '../utils/scheduler.js';
@@ -10,7 +11,8 @@ const STATUS_OPTIONS = [
   { id: 'failed', label: 'ตก/ถอน', tone: 'warning' },
 ];
 
-const RISK_LABEL = { low: '🟢 ความเสี่ยงต่ำ', medium: '🟡 ความเสี่ยงปานกลาง', high: '🔴 ความเสี่ยงสูง' };
+const RISK_LABEL = { low: 'ความเสี่ยงต่ำ', medium: 'ความเสี่ยงปานกลาง', high: 'ความเสี่ยงสูง' };
+const RISK_TONE = { low: 'success', medium: 'warning', high: 'danger' };
 
 function courseStatus(code, completed, failed) {
   if (completed.has(code)) return 'completed';
@@ -144,39 +146,37 @@ export default function TranscriptPanel({ completed, setCompleted, failed, setFa
   }
 
   return (
-    <div>
-      <div className="summary-card">
+    <div className="stack">
+      <section className="summary-strip" aria-label="สรุปผลการเรียน">
         <div className="summary-stat">
-          <span className="value">{earnedCredits}</span>
+          <span className="value tabular">{earnedCredits}</span>
           <span className="label">หน่วยกิตสะสม</span>
         </div>
         <div className="summary-stat">
-          <span className={`value ${failed.size > 0 ? 'warning' : ''}`}>{failed.size}</span>
-          <span className="label">วิชาที่ต้องลงใหม่</span>
-        </div>
-        <div className="summary-stat">
-          <span className="value">{completed.size}</span>
+          <span className="value tabular">{completed.size}</span>
           <span className="label">วิชาที่ผ่านแล้ว</span>
         </div>
         <div className="summary-stat">
+          <span className={`value tabular ${failed.size > 0 ? 'danger' : ''}`}>{failed.size}</span>
+          <span className="label">วิชาที่ต้องลงใหม่</span>
+        </div>
+        <div className="summary-stat">
           <span className={`value ${forecast.onTime ? '' : 'warning'}`}>
-            {forecast.gradTerm ? termLabel(forecast.gradTerm) : '-'}
+            {forecast.gradTerm ? termLabel(forecast.gradTerm) : '–'}
           </span>
           <span className="label">
             คาดว่าจบ{forecast.onTime ? ' (ตามกำหนด)' : ` (ช้า ${forecast.delaySemesters} เทอม)`}
           </span>
         </div>
-        <div className="summary-actions">
-          <label className="hint" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: 0 }}>
-            รหัสนักศึกษา (mock):
-            <input value={studentCode} onChange={(e) => setStudentCode(e.target.value)} />
-          </label>
-        </div>
-      </div>
+        <label className="field-stack summary-input">
+          <span>รหัสนักศึกษา (จำลอง)</span>
+          <input className="input" value={studentCode} onChange={(e) => setStudentCode(e.target.value)} />
+        </label>
+      </section>
 
-      <p className="hint" style={{ marginBottom: '1rem' }}>
+      <p className="hint">
         เลือกสถานะแต่ละวิชา — "ตก/ถอน" จะให้ AI (KKUIntelSphere หรือ rule-based fallback) ประเมินความเสี่ยง
-        และ Dashboard จะจัดวิชานั้นไปลงใหม่ในเทอมที่เปิดสอนถัดไปให้อัตโนมัติ (ทั้งโหมด Official และ GA)
+        และหน้าแผนการเรียนจะจัดวิชานั้นไปลงใหม่ในเทอมที่เปิดสอนถัดไปให้อัตโนมัติ (ทั้งแผนหลักสูตรและแผน GA)
       </p>
 
       {years.map(({ year, terms }) => {
@@ -184,6 +184,7 @@ export default function TranscriptPanel({ completed, setCompleted, failed, setFa
         return (
           <details key={year} className="year-accordion" open={year <= openUpToYear}>
             <summary>
+              <ChevronDown className="accordion-chevron" size={18} aria-hidden="true" />
               <span>ปีการศึกษาที่ {year}</span>
               <span className="year-meta">
                 {allCourses.filter((c) => completed.has(c.code)).length}/{allCourses.length} วิชาผ่านแล้ว
@@ -212,13 +213,15 @@ export default function TranscriptPanel({ completed, setCompleted, failed, setFa
                       <div key={c.code} className="course-row">
                         <span
                           className={`course-row-name ${failed.has(c.code) ? 'retake' : ''}`}
-                          title={`${c.code} — ${c.nameTh}`}
+                          title={c.nameTh}
                         >
-                          {c.code} — {c.nameEn}
-                          {pendingCode === c.code && ' ⏳'}
+                          <span className="mono-code">{c.code}</span>
+                          <span>{c.nameEn}</span>
+                          {pendingCode === c.code && <Loader2 className="spin" size={14} aria-label="กำลังบันทึก" />}
                         </span>
                         <SegmentedControl
                           size="sm"
+                          label={`สถานะของ ${c.code}`}
                           options={rowOptions}
                           value={courseStatus(c.code, completed, failed)}
                           onChange={(status) => setStatus(c.code, status)}
@@ -234,18 +237,26 @@ export default function TranscriptPanel({ completed, setCompleted, failed, setFa
       })}
 
       {analysis && (
-        <div className="panel risk-panel">
-          <h3>🩺 AI Transcript Risk Analysis</h3>
+        <section className="panel risk-panel" aria-live="polite">
+          <h2 className="panel-title">
+            <Activity size={18} aria-hidden="true" />
+            วิเคราะห์ความเสี่ยงจากผลการเรียน
+          </h2>
           <p className="hint">
-            วิเคราะห์ล่าสุดจากการเปลี่ยนสถานะ <strong>{analysis.courseCode}</strong> — แหล่งวิเคราะห์: {analysis.source}
+            จากการเปลี่ยนสถานะ <strong>{analysis.courseCode}</strong> ล่าสุด · แหล่งวิเคราะห์: {analysis.source}
           </p>
-          <div className="warnings">
-            <div className="warning-item">{RISK_LABEL[analysis.result?.riskLevel] ?? analysis.result?.riskLevel}</div>
+          <span className={`risk-level ${RISK_TONE[analysis.result?.riskLevel] ?? ''}`}>
+            {RISK_LABEL[analysis.result?.riskLevel] ?? analysis.result?.riskLevel}
+          </span>
+          <ul className="warnings">
             {(analysis.result?.warnings ?? []).map((w, i) => (
-              <div key={i} className="warning-item bottleneck">⚠ {w}</div>
+              <li key={i} className="notice warning">
+                <AlertTriangle size={16} aria-hidden="true" />
+                <span>{w}</span>
+              </li>
             ))}
-          </div>
-        </div>
+          </ul>
+        </section>
       )}
     </div>
   );

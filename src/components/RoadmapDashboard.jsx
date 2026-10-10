@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { AlertTriangle, CalendarClock, CheckCircle2, FastForward, GraduationCap, Info, Lock, RotateCcw } from 'lucide-react';
 import {
   forecastGraduation,
   generateOfficialPlan,
@@ -23,6 +24,16 @@ const PLAN_METHOD_OPTIONS = [
   { id: 'ga', label: 'GA Optimized', tone: 'accent' },
 ];
 const GA_DEBOUNCE_MS = 300; // กันยิง request รัว ๆ ตอนลาก slider ชั่วโมง/สัปดาห์
+
+// ไอคอน + โทนของคำเตือนแต่ละประเภทจาก scheduler/GA
+const WARNING_STYLE = {
+  bottleneck: { Icon: Lock, tone: 'warning' },
+  overload: { Icon: CalendarClock, tone: 'info' },
+  shifted: { Icon: FastForward, tone: 'info' },
+  extended: { Icon: GraduationCap, tone: 'warning' },
+  filled: { Icon: Info, tone: 'success' },
+  unresolved: { Icon: AlertTriangle, tone: 'danger' },
+};
 
 export default function RoadmapDashboard({
   constraints,
@@ -132,10 +143,12 @@ export default function RoadmapDashboard({
     setConstraints((c) => ({ ...c, [key]: value }));
   }
 
-  return (
-    <div className="dashboard">
-      <h2 style={{ marginTop: 0 }}>Dynamic Roadmap Dashboard</h2>
+  const methodNote = isGa
+    ? `เพิ่มประสิทธิภาพด้วย Genetic Algorithm${gaState.source ? ` · ${gaState.source}` : ''}`
+    : 'ตามโครงสร้างหลักสูตร ปี 1–4 (เอกสารทางการ)';
 
+  return (
+    <div className="stack">
       <GraduationForecast
         forecast={forecast}
         loading={isGa && (gaState.loading || !gaState.result)}
@@ -147,154 +160,163 @@ export default function RoadmapDashboard({
         unrecordedCount={unrecordedCount}
       />
 
-      <div className="dashboard-toolbar">
-        <p className="hint dashboard-hint">
-          แผนหลัก: <strong>{isGa ? 'เพิ่มประสิทธิภาพด้วย Genetic Algorithm' : 'ตามโครงสร้างหลักสูตร ปี 1–4 (เอกสารทางการ)'}</strong>
-          {' · '}สายอาชีพที่ใช้เติมวิชาเลือก: <strong>{tracks.length ? tracksLabel(tracks) : 'ยังไม่ระบุ'}</strong>
-          {' · '}วิชาเลือกที่เติมแล้ว: <strong>{electiveCreditTotal}</strong>/15
-          {isGa && gaState.source && <> {' · '}แหล่งคำนวณ: {gaState.source}</>}
-          {isGa && failed.size > 0 && <> {' · '}<span className="status-chip warning" style={{ marginLeft: '0.3rem' }}>🔁 จัดวิชาที่ต้องลงใหม่ {failed.size} วิชาให้เร็วที่สุด</span></>}
-          {!isGa && failed.size > 0 && <> {' · '}<span className="status-chip warning" style={{ marginLeft: '0.3rem' }}>⏩ เลื่อนวิชาที่ต้องลงใหม่และวิชาตัวต่อ {failed.size} วิชาให้อัตโนมัติ</span></>}
-          {' '}
-          <button type="button" className="link-button" onClick={onNavigateToGoals}>
-            แก้ไขเป้าหมาย (สายอาชีพ/ชม.ต่อสัปดาห์/เกียรตินิยม) →
-          </button>
-        </p>
-
-        <div className="dashboard-controls">
-          <SegmentedControl options={PLAN_METHOD_OPTIONS} value={planMethod} onChange={setPlanMethod} />
-
-          <div className="control-group">
-            <span className="hint" style={{ marginBottom: 0 }}>ปี 4:</span>
+      <section className="toolbar" aria-label="ตัวเลือกแผน">
+        <div className="toolbar-row">
+          <SegmentedControl label="วิธีคำนวณแผน" options={PLAN_METHOD_OPTIONS} value={planMethod} onChange={setPlanMethod} />
+          <label className="field-inline">
+            <span>ปี 4</span>
             <select value={yearPathPreference} onChange={(e) => setConstraint('yearPathPreference', e.target.value)}>
               {Object.entries(YEAR4_PATHS).map(([id, label]) => (
                 <option key={id} value={id}>{label}</option>
               ))}
             </select>
-          </div>
-
-          <div className="control-group" title="สมมติฐานว่าวิชาที่ตกจะลงใหม่ได้เมื่อไหร่ — ถ้าคณะเปิดวิชาปีละครั้ง การตกวิชาจะทำให้รอ 1 ปี">
-            <span className="hint" style={{ marginBottom: 0 }}>การเปิดสอน:</span>
+          </label>
+          <label className="field-inline" title="สมมติฐานว่าวิชาที่ตกจะลงใหม่ได้เมื่อไหร่ — ถ้าคณะเปิดวิชาปีละครั้ง การตกวิชาจะทำให้รอ 1 ปี">
+            <span>การเปิดสอน</span>
             <select value={offeringPolicy} onChange={(e) => setConstraint('offeringPolicy', e.target.value)}>
               {Object.entries(OFFERING_POLICIES).map(([id, label]) => (
                 <option key={id} value={id}>{label}</option>
               ))}
             </select>
-          </div>
-
-          <div className="control-group">
-            <span className="hint" style={{ marginBottom: 0 }}>อยู่เทอมปัจจุบัน:</span>
+          </label>
+          <label className="field-inline">
+            <span>เทอมปัจจุบัน</span>
             <select value={effectiveStartTerm} onChange={(e) => setConstraint('startTerm', Number(e.target.value))}>
               {TERM_OPTIONS.map((t) => (
                 <option key={t} value={t}>{termLabel(t)}</option>
               ))}
             </select>
-          </div>
+          </label>
         </div>
-      </div>
+        <p className="toolbar-meta">
+          <span>{methodNote}</span>
+          <span>วิชาเลือกสาขา <strong className="tabular">{electiveCreditTotal}/15</strong> หน่วยกิต จาก {tracks.length ? tracksLabel(tracks) : 'ยังไม่ได้เลือกสาย'}</span>
+          {failed.size > 0 && (
+            <span className="meta-flag">
+              <RotateCcw size={14} aria-hidden="true" />
+              {isGa ? `จัดวิชาที่ต้องลงใหม่ ${failed.size} วิชาให้เร็วที่สุด` : `เลื่อนวิชาที่ต้องลงใหม่และวิชาตัวต่อ ${failed.size} วิชาให้อัตโนมัติ`}
+            </span>
+          )}
+          <button type="button" className="link-button" onClick={onNavigateToGoals}>แก้ไขเป้าหมาย</button>
+        </p>
+      </section>
 
       {warnings.length > 0 && (
         <details className="warnings-group" open={warnings.length <= 4}>
-          <summary>⚠️ คำเตือนของแผนนี้ ({warnings.length})</summary>
-          <div className="warnings">
-            {warnings.map((w, i) => (
-              <div key={i} className={`warning-item ${w.type}`}>
-                {w.type === 'bottleneck' && '🚧 '}
-                {w.type === 'overload' && '⏱ '}
-                {w.type === 'shifted' && '⏩ '}
-                {w.type === 'extended' && '🎓 '}
-                {w.type === 'filled' && 'ℹ️ '}
-                {w.term ? `[${termLabel(w.term)}] ` : ''}{w.message}
-              </div>
-            ))}
-          </div>
+          <summary>
+            <AlertTriangle size={16} aria-hidden="true" />
+            คำเตือนของแผนนี้ <span className="count">{warnings.length}</span>
+          </summary>
+          <ul className="warnings">
+            {warnings.map((w, i) => {
+              const { Icon, tone } = WARNING_STYLE[w.type] ?? WARNING_STYLE.overload;
+              return (
+                <li key={i} className={`notice ${tone}`}>
+                  <Icon size={16} aria-hidden="true" />
+                  <span>{w.term ? <strong>{termLabel(w.term)} · </strong> : null}{w.message}</span>
+                </li>
+              );
+            })}
+          </ul>
         </details>
       )}
 
-      <div className="term-nav-strip">
+      <nav className="term-nav" aria-label="ไปยังเทอม">
         {plan.map((termPlan) => (
           <button
             key={termPlan.term}
             type="button"
-            className={`term-nav-chip ${termPlan.term === currentTermForNav ? 'current' : ''} ${termPlan.term > ON_TIME_TERM ? 'late' : ''}`}
+            className={`term-nav-chip ${termPlan.term === currentTermForNav ? 'current' : ''} ${termPlan.term > ON_TIME_TERM ? 'late' : ''} ${termPlan.term < effectiveStartTerm ? 'past' : ''}`}
+            style={{ flexGrow: Math.max(termPlan.credits, 3) }}
             onClick={() => scrollToTerm(termPlan.term)}
+            title={`${termLabel(termPlan.term)} · ${termPlan.credits} หน่วยกิต`}
           >
-            {Math.floor(termPlan.term / 10)}/{termPlan.term % 10}
+            <span>{Math.floor(termPlan.term / 10)}/{termPlan.term % 10}</span>
+            <small className="tabular">{termPlan.credits}</small>
           </button>
         ))}
-      </div>
+      </nav>
 
       <div className="roadmap-grid">
         {plan.map((termPlan) => {
           const overloaded = termPlan.maxLoad && termPlan.load > termPlan.maxLoad;
+          const isCurrent = termPlan.term === currentTermForNav;
           return (
-            <div
+            <section
               key={termPlan.term}
-              className={`term-column ${termPlan.term > ON_TIME_TERM ? 'late' : ''} ${termPlan.term < effectiveStartTerm ? 'past' : ''}`}
+              className={`term-column ${termPlan.term > ON_TIME_TERM ? 'late' : ''} ${termPlan.term < effectiveStartTerm ? 'past' : ''} ${isCurrent ? 'current' : ''}`}
+              aria-label={termPlan.yearLabel ?? termLabel(termPlan.term)}
               ref={(el) => {
                 if (el) termRefs.current.set(termPlan.term, el);
                 else termRefs.current.delete(termPlan.term);
               }}
             >
-              <div className="term-header">
-                <span>{termPlan.yearLabel ?? termLabel(termPlan.term)}</span>
-                <span className="term-credit-badge">{termPlan.credits} หน่วยกิต</span>
-              </div>
+              <header className="term-header">
+                <h3>{termPlan.yearLabel ?? termLabel(termPlan.term)}</h3>
+                <span className="term-credits tabular">{termPlan.credits} นก.</span>
+              </header>
               {termPlan.maxLoad > 0 && termPlan.courses.length > 0 && (
                 <div className={`load-meter ${overloaded ? 'over' : ''}`} title="ภาระทางปัญญารวม (Cognitive Load) เทียบกับงบที่คำนวณจากเวลาว่างต่อสัปดาห์">
                   <div className="load-meter-track">
                     <div className="load-meter-fill" style={{ width: `${Math.min(100, (termPlan.load / termPlan.maxLoad) * 100)}%` }} />
                   </div>
-                  <span>ภาระ {termPlan.load}/{termPlan.maxLoad}{overloaded ? ' · เกินงบ' : ''}</span>
+                  <span className="tabular">ภาระ {termPlan.load}/{termPlan.maxLoad}{overloaded ? ' · เกินงบ' : ''}</span>
                 </div>
               )}
-              {termPlan.courses.map((c) => (
-                <CourseCard
-                  key={c.code}
-                  course={c}
-                  downstreamCount={downstreamCounts[c.code]}
-                  isCritical={criticalSet.has(c.code)}
-                  retake={failed.has(c.code)}
-                  electiveSource={electiveSource[c.code]}
-                />
-              ))}
-              {termPlan.electivePlaceholderCredits > 0 && (
-                <div className="course-card placeholder">
-                  <div className="course-name">
-                    ⬜ วิชาเลือกเฉพาะทาง ({termPlan.electivePlaceholderCredits} หน่วยกิต)
+              <div className="course-list">
+                {termPlan.courses.map((c) => (
+                  <CourseCard
+                    key={c.code}
+                    course={c}
+                    downstreamCount={downstreamCounts[c.code]}
+                    isCritical={criticalSet.has(c.code)}
+                    retake={failed.has(c.code)}
+                    electiveSource={electiveSource[c.code]}
+                  />
+                ))}
+                {termPlan.electivePlaceholderCredits > 0 && (
+                  <div className="course-card placeholder">
+                    <div className="course-name">วิชาเลือกเฉพาะทาง {termPlan.electivePlaceholderCredits} หน่วยกิต</div>
+                    <div className="placeholder-hint">
+                      {tracks.length ? 'ไม่มีวิชาที่ตรงเงื่อนไข prerequisite ในเทอมนี้ — เลือกเองภายหลัง' : (
+                        <>ยังไม่ได้เลือกสายอาชีพ <button type="button" className="link-button" onClick={onNavigateToGoals}>เลือกในหน้าเป้าหมาย</button></>
+                      )}
+                    </div>
                   </div>
-                  <div className="hint" style={{ fontSize: '0.72rem' }}>
-                    {tracks.length ? 'ไม่มีวิชาที่ตรงเงื่อนไข prerequisite ในเทอมนี้ — เลือกเองภายหลัง' : 'เลือกสายอาชีพในแท็บ "เป้าหมาย" เพื่อให้ระบบช่วยเลือก'}
+                )}
+                {termPlan.freeElectiveCredits > 0 && (
+                  <div className="course-card placeholder">
+                    <div className="course-name">วิชาเลือกเสรี {termPlan.freeElectiveCredits} หน่วยกิต</div>
                   </div>
-                </div>
-              )}
-              {termPlan.freeElectiveCredits > 0 && (
-                <div className="course-card placeholder">
-                  <div className="course-name">⬜ วิชาเลือกเสรี ({termPlan.freeElectiveCredits} หน่วยกิต)</div>
-                </div>
-              )}
-              {termPlan.note && (
-                <div className="hint" style={{ fontSize: '0.72rem', marginTop: '0.4rem' }}>ℹ️ {termPlan.note}</div>
-              )}
-            </div>
+                )}
+                {termPlan.courses.length === 0 && !termPlan.electivePlaceholderCredits && !termPlan.freeElectiveCredits && (
+                  <p className="term-empty">
+                    <CheckCircle2 size={16} aria-hidden="true" />
+                    ไม่มีวิชาที่ต้องลงในเทอมนี้แล้ว
+                  </p>
+                )}
+              </div>
+              {termPlan.note && <p className="term-note">{termPlan.note}</p>}
+            </section>
           );
         })}
       </div>
 
       {tracks.length > 0 && recommendedMore.length > 0 && (
-        <div className="panel" style={{ marginTop: '1.2rem' }}>
-          <h3>➕ แนะนำเพิ่มเติมตามความสนใจ ({tracksLabel(tracks)})</h3>
+        <section className="panel">
+          <h2 className="panel-title">แนะนำเพิ่มเติมตามความสนใจ</h2>
           <p className="hint">
-            วิชาเหล่านี้ตรงกับสายอาชีพที่คุณสนใจ แต่ยังไม่ถูกใส่ในช่องวิชาเลือกบังคับของแผนหลัก
-            สามารถนำไปใช้แทนวิชาเลือกเสรีในปี 4 หรือสลับกับวิชาเลือกเฉพาะทางในแผนได้ตามต้องการ
+            วิชาเหล่านี้ตรงกับ{tracksLabel(tracks)} แต่ยังไม่ถูกใส่ในช่องวิชาเลือกของแผนหลัก
+            ใช้แทนวิชาเลือกเสรีในปี 4 หรือสลับกับวิชาเลือกเฉพาะทางในแผนได้
           </p>
           <div className="recommend-grid">
             {recommendedMore.slice(0, 8).map((c) => (
               <CourseCard key={c.code} course={c} downstreamCount={downstreamCounts[c.code]} />
             ))}
           </div>
-        </div>
+        </section>
       )}
     </div>
   );
 }
+

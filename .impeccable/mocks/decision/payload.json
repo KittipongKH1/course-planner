@@ -1,0 +1,132 @@
+{
+  "title": "เลือกโลกภาพของ Course Planner (โทนฟ้า-ขาว)",
+  "question": "ทิศทางที่สุ่มได้คือ \"ชีทปากกาน้ำเงิน\" — เลือกใช้ทิศทางนี้, เลือกตัวเลือกอื่น หรือสุ่มใหม่",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "ชีทปากกาน้ำเงิน (Blue Ballpoint Lecture Sheet)",
+      "kicker": "THE ROLL",
+      "lineage": "ชีทเรียนถ่ายเอกสารที่นักศึกษาไทยจดด้วยปากกาลูกลื่นน้ำเงินและไฮไลต์",
+      "thesis": "แผนการเรียนอ่านเหมือนชีทที่จดมาอย่างดี: ทุกวิชาที่ถูกวางมีเหตุผลเขียนกำกับไว้ที่ขอบกระดาษ",
+      "palette": ["#fbfcff", "#1d3a8a", "#2f54eb", "#e6eeff", "#dff26a", "#d43d3d"],
+      "materials": ["กระดาษถ่ายเอกสารขาว", "เส้นปากกาลูกลื่นน้ำเงิน", "แถบไฮไลต์บนเส้นทางวิกฤต"],
+      "viewport": "แถบแท็บด้านบนสีน้ำเงินหมึก, เทอมที่คาดว่าจะจบตัวใหญ่ระดับโปสเตอร์, คอลัมน์เทอมเหมือนหน้าชีท, วิชาบนเส้นทางวิกฤตมีแถบไฮไลต์, คลิกวิชาแล้วมีโน้ตขอบกระดาษบอกเหตุผลที่วิชาอยู่เทอมนี้",
+      "risk": "ถ้าใส่ลายมือ/เอฟเฟกต์หมึกเกินแค่เส้นขีดเส้นใต้กับโน้ตขอบกระดาษ จะดูเด็กและอ่านยาก",
+      "raised": [
+        { "from": "challenger-emission-rail", "raise": "สถานะบอกด้วยรูปเส้น ไม่ใช่สีอย่างเดียว: ผ่านแล้ว = ขีดเส้นใต้ทึบ, วางแผน = เส้นประ, ตก = ขีดฆ่าปากกาแดง, ลงใหม่ = เส้นคู่" },
+        { "from": "challenger-metro-tiles", "raise": "ตัวเลขเดียวที่ขนาดโปสเตอร์: เทอมที่คาดว่าจะจบ คือหัวเรื่องของทั้งหน้า Dashboard" },
+        { "from": "challenger-doujin-catalog", "raise": "ความหนาแน่นทั้งหลักสูตร: หน้า Critical Path แสดงครบ 65 วิชาเป็นช่องในหน้าเดียว วิชาที่เลือกถูกวงด้วยปากกา" },
+        { "from": "challenger-acetate-manual", "raise": "แถบนำทางเทอม: ความกว้างของแต่ละแท็บเทอมเป็นสัดส่วนกับหน่วยกิตของเทอมนั้น" }
+      ],
+      "html": ".impeccable/mocks/decision/assigned.html"
+    },
+    {
+      "id": "model-pick",
+      "label": "กระดาษคำตอบทะเบียน (Registrar Answer Sheet)",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "แบบฟอร์มและกระดาษคำตอบพิมพ์หมึกฟ้าของมหาวิทยาลัยไทย",
+      "thesis": "แผนการเรียนเป็นแบบฟอร์มทางการที่นักศึกษาฝนเอง: สถานะวิชาคือวงกลมที่ฝนแล้วหรือยังว่าง",
+      "palette": ["#ffffff", "#1e5bd8", "#cfe0ff", "#0f1f3d", "#f2b705"],
+      "materials": ["แบบฟอร์มพิมพ์หมึกฟ้า", "ตารางช่องวงกลมให้ฝน", "ช่องรหัสตีกรอบ"],
+      "viewport": "หัวฟอร์มแบบทะเบียนพร้อมช่องรหัสนักศึกษา, ตารางเทอม × วิชา, วิชาที่ผ่านแล้วเป็นวงกลมฝนทึบ วิชาในแผนเป็นวงกลมโปร่ง",
+      "risk": "คุ้นเคยที่สุดในหมวดนี้ และอาจชวนนึกถึงความเครียดตอนสอบมากกว่าการวางแผน",
+      "html": ".impeccable/mocks/decision/model-pick.html"
+    },
+    {
+      "id": "challenger-star-atlas",
+      "label": "แผนที่ดาวหลักสูตร (Curriculum Star Atlas)",
+      "verdict": "competitive",
+      "lineage": "แผนที่ดาวพิมพ์ ขนาดจุดตามความสว่าง",
+      "thesis": "หลักสูตรคือท้องฟ้า: ขนาดจุดคือความสำคัญของวิชา เส้นกลุ่มดาวคือวิชาบังคับก่อน",
+      "palette": ["#0b1e4a", "#f4f7ff", "#7fa7ff", "#ffb347"],
+      "materials": ["พื้นแผนที่สีกรมท่า", "จุดดาวสีชอล์ก", "วงแหวนสีอำพันรอบวิชาที่เลือก"],
+      "viewport": "Dashboard ซ้าย, แผนที่หลักสูตรขวา จุดใหญ่คือวิชาคอขวด เส้นเชื่อมคือ prerequisite",
+      "case": "ผสานได้ดี: cruciality = ขนาดจุด, prerequisite = เส้นกลุ่มดาว — แพ้ด้านผู้ใช้ เพราะนักศึกษาไม่ได้อ่านแผนที่ดาว และพื้นกรมท่าทำให้ธีมโน้มไปทางมืดทั้งที่กำหนดฟ้า-ขาว",
+      "risk": "สวยแต่ทำให้งานหลัก (ดูแผนรายเทอม) อยู่รองจากภาพ",
+      "hero": "https://impeccable.style/worlds/cards/notation-diagram-systems-star-atlas-hero.webp",
+      "html": ".impeccable/mocks/decision/challenger-star-atlas.html"
+    },
+    {
+      "id": "challenger-jcard",
+      "label": "ปกเทปมิกซ์เทป (Mixtape J-Card)",
+      "verdict": "competitive",
+      "lineage": "ปกเทปคาสเซ็ตที่เขียนรายชื่อเพลงด้วยปากกาลูกลื่น",
+      "thesis": "แต่ละเทอมคือหน้าเทปที่ความยาวจำกัด: ใส่วิชาได้จนเต็มเพดานหน่วยกิต ห้ามล้น",
+      "palette": ["#ffffff", "#1d3a8a", "#9aa4b5", "#d8b23a"],
+      "materials": ["กระดาษปกเทปมีเส้นบรรทัด", "ลายมือปากกาน้ำเงิน", "แถบสีแบรนด์เทป"],
+      "viewport": "เทอมเป็นหน้าเทป A/B, หน่วยกิตชิดขวาเหมือนเวลาเพลง, แถบความจุเทปบอกเพดานหน่วยกิต/ภาระ",
+      "case": "ผสานได้ดี: เพดานหน่วยกิตต่อเทอม = ความยาวหน้าเทป — แพ้ด้านผู้ใช้ เทปคาสเซ็ตไม่ใช่ของในชีวิตนักศึกษารุ่นนี้",
+      "risk": "เสี่ยงเป็นแค่คอสตูมย้อนยุค",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-cassette-j-card-hero.webp",
+      "html": ".impeccable/mocks/decision/challenger-jcard.html"
+    },
+    {
+      "id": "challenger-emission-rail",
+      "label": "Emission-Line Rail",
+      "verdict": "declined",
+      "lineage": "สเปกโตรแกรมบนแผ่นแก้ว",
+      "thesis": "ทุกอย่างแขวนบนรางเดียว สถานะบอกด้วยรูปเส้น",
+      "palette": ["#2a2c30", "#e9e4d8", "#f2c94c"],
+      "materials": ["พื้นถ่านไล่โทน", "เส้นแสงบาง"],
+      "viewport": "รางเดียวแนวนอน ปลายทางเป็นขีด",
+      "case": "แพ้ทั้งสองด้าน: พื้นถ่านขัดกับฟ้า-ขาว และนักศึกษาไม่รู้จักสเปกโตรแกรม",
+      "kept": "สถานะบอกด้วยรูปเส้น (ทึบ/ประ/ขีดฆ่า/เส้นคู่) ไม่ใช่สีอย่างเดียว",
+      "risk": "อ่านยากถ้าไม่รู้ภาษาเส้น",
+      "hero": "https://impeccable.style/worlds/cards/operate-c-emission-line-rail-hero.webp"
+    },
+    {
+      "id": "challenger-metro-tiles",
+      "label": "Metro Typographic Tiles",
+      "verdict": "declined",
+      "lineage": "Windows Phone Metro",
+      "thesis": "ตัวอักษรคืออินเทอร์เฟซ",
+      "palette": ["#000000", "#1ba1e2", "#ffffff"],
+      "materials": ["กระเบื้องสีเรียบ", "ตัวพิมพ์เล็กขนาดยักษ์"],
+      "viewport": "พาโนรามาของกระเบื้อง",
+      "case": "แพ้ทั้งสองด้าน: พื้นดำ และภาษาภาพที่เลิกใช้ไปแล้ว",
+      "kept": "ตัวเลขเดียวขนาดโปสเตอร์ — เทอมที่คาดว่าจะจบ",
+      "risk": "ล้าสมัย",
+      "hero": "https://impeccable.style/worlds/cards/digital-design-canon-metro-typographic-tiles-hero.webp"
+    },
+    {
+      "id": "challenger-doujin-catalog",
+      "label": "Doujin Event Catalog",
+      "verdict": "declined",
+      "lineage": "แคตตาล็อกงานคอมิกพิมพ์บนกระดาษปรู๊ฟ",
+      "thesis": "ทุกอย่างอยู่ในตารางช่องหนาแน่น วงด้วยปากกา",
+      "palette": ["#e7e4dc", "#111111", "#2b7bd6"],
+      "materials": ["กระดาษปรู๊ฟ", "หมึกสีเดียว"],
+      "viewport": "ตารางช่องเล็กเต็มหน้า",
+      "case": "แพ้ทั้งสองด้าน: กระดาษเทาไม่ใช่ฟ้า-ขาว และช่องเล็กเกินสำหรับชื่อวิชาไทย",
+      "kept": "แสดงทั้งหลักสูตรเป็นช่องในหน้าเดียว วงวิชาที่เลือก",
+      "risk": "แน่นเกินบนมือถือ",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-doujin-event-catalog-hero.webp"
+    },
+    {
+      "id": "challenger-acetate-manual",
+      "label": "Acetate Tab Manual",
+      "verdict": "declined",
+      "lineage": "คู่มือซอฟต์แวร์แบบมีแถบแบ่งหมวด",
+      "thesis": "แถบหมวดตามขอบหนังสือ สูงตามความยาวหมวด",
+      "palette": ["#f4f1ea", "#e8a33d", "#2c4bd6"],
+      "materials": ["แผ่นอะซิเตทใส", "กระดาษแข็งสีหมวด"],
+      "viewport": "หนังสือเปิดพร้อมแถบสีด้านข้าง",
+      "case": "แพ้ทั้งสองด้าน: สีหลายหมวดกลบโทนฟ้า-ขาว และคู่มือกระดาษไม่ใช่โลกของผู้ใช้",
+      "kept": "แท็บเทอมกว้างตามสัดส่วนหน่วยกิต",
+      "risk": "สีมากเกินสำหรับงานวางแผน",
+      "hero": "https://impeccable.style/worlds/cards/rw-manual-acetate-tab-board-hero.webp"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "canon": true,
+  "canonCard": {
+    "label": "มาตรฐานของหมวดนี้ (University Portal)",
+    "thesis": "แดชบอร์ดพอร์ทัลมหาวิทยาลัยแบบที่ทุกคนคุ้นเคย ทำให้ประณีตที่สุด",
+    "palette": ["#ffffff", "#f1f5fb", "#0f172a", "#2563eb"],
+    "materials": ["กริดสะอาด", "การ์ดขาวขอบบาง", "ไอคอนเส้น"],
+    "viewport": "แถบนำทางซ้าย, การ์ดสรุปด้านบน, ตารางแผนรายเทอมด้านล่าง",
+    "risk": "แยกไม่ออกจากระบบทั่วไป ตามที่ตั้งใจ",
+    "html": ".impeccable/mocks/decision/canon.html"
+  },
+  "steer": true
+}

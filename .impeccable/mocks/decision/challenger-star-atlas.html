@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;background:#f4f7ff;color:#0b1e4a;font-family:Anuphan,sans-serif;display:grid;grid-template-columns:520px 1fr}
+.left{padding:28px 32px;background:#fff}
+.brand{font-weight:700;font-size:17px}.brand small{display:block;font-weight:400;font-size:12px;color:#55648c}
+.tabs{display:flex;gap:6px;margin:20px 0 26px;flex-wrap:wrap}
+.tab{padding:7px 14px;border-radius:999px;font-size:14px;border:1px solid #c9d6f5}.tab.on{background:#0b1e4a;color:#fff;border-color:#0b1e4a}
+.k{font-size:14px;color:#55648c}.big{font-size:60px;font-weight:700;margin-bottom:18px}
+.row{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid #e3eaf9;font-size:15px}.row b{color:#2b54c9}
+.list h4{margin:22px 0 8px;font-size:15px}
+.it{display:flex;gap:10px;align-items:center;padding:6px 0;font-size:14px}.it i{border-radius:50%;background:#0b1e4a;display:inline-block}
+.sky{background:#0b1e4a;position:relative;overflow:hidden}
+.sky .grid{position:absolute;inset:0;background-image:linear-gradient(#ffffff10 1px,transparent 1px),linear-gradient(90deg,#ffffff10 1px,transparent 1px);background-size:120px 120px}
+.s{position:absolute;border-radius:50%;background:#f4f7ff}
+.l{position:absolute;height:1px;background:#7fa7ff88;transform-origin:0 0}
+.lab{position:absolute;color:#c8d6ff;font-size:13px}
+.ring{position:absolute;border:2px solid #ffb347;border-radius:50%}
+.cap{position:absolute;left:32px;bottom:28px;color:#c8d6ff;font-size:13px;line-height:1.7}
+.cap b{color:#fff;font-size:16px}
+.term{position:absolute;top:24px;color:#7fa7ff;font-size:12px}
+</style></head><body>
+<div class="left">
+ <div class="brand">Course Planner<small>วิทยาลัยการคอมพิวเตอร์ มข. · หลักสูตร 2565</small></div>
+ <div class="tabs"><div class="tab">เป้าหมาย</div><div class="tab on">แผนการเรียน</div><div class="tab">เส้นทางวิกฤต</div><div class="tab">ผลการเรียน</div><div class="tab">ถาม-ตอบ</div></div>
+ <div class="k">คาดว่าจบ</div><div class="big">ปี 4 เทอม 2</div>
+ <div class="row">หน่วยกิตสะสม<b>54 / 128</b></div>
+ <div class="row">วิชาเลือกสาขา<b>15 / 15</b></div>
+ <div class="row">ต้องลงใหม่<b>CP352001</b></div>
+ <div class="list"><h4>วิชาสว่างที่สุด (ความสำคัญสูง)</h4>
+  <div class="it"><i style="width:16px;height:16px"></i>CP352001 Data Structures — ปลดล็อก 7 วิชา</div>
+  <div class="it"><i style="width:13px;height:13px"></i>CP351003 Object Oriented Programming</div>
+  <div class="it"><i style="width:11px;height:11px"></i>CP353002 Principles of Software Design</div>
+  <div class="it"><i style="width:9px;height:9px"></i>CP353102 Intro to Machine Learning</div></div>
+</div>
+<div class="sky"><div class="grid"></div>
+ <div class="term" style="left:60px">ปี 1</div><div class="term" style="left:290px">ปี 2</div><div class="term" style="left:520px">ปี 3</div><div class="term" style="left:750px">ปี 4</div>
+ <div class="l" style="left:110px;top:300px;width:250px;transform:rotate(12deg)"></div>
+ <div class="l" style="left:355px;top:352px;width:240px;transform:rotate(-20deg)"></div>
+ <div class="l" style="left:355px;top:352px;width:250px;transform:rotate(22deg)"></div>
+ <div class="l" style="left:590px;top:270px;width:220px;transform:rotate(30deg)"></div>
+ <div class="l" style="left:120px;top:520px;width:240px;transform:rotate(-8deg)"></div>
+ <div class="l" style="left:590px;top:270px;width:230px;transform:rotate(-14deg)"></div>
+ <div class="s" style="left:100px;top:290px;width:20px;height:20px"></div><div class="lab" style="left:80px;top:318px">CP351001</div>
+ <div class="s" style="left:342px;top:338px;width:28px;height:28px"></div><div class="lab" style="left:322px;top:372px">CP352001</div>
+ <div class="ring" style="left:330px;top:326px;width:52px;height:52px"></div>
+ <div class="s" style="left:580px;top:260px;width:20px;height:20px"></div><div class="lab" style="left:560px;top:230px">CP352006</div>
+ <div class="s" style="left:588px;top:445px;width:16px;height:16px"></div><div class="lab" style="left:570px;top:468px">CP353005</div>
+ <div class="s" style="left:800px;top:378px;width:12px;height:12px"></div><div class="lab" style="left:780px;top:398px">CP354771</div>
+ <div class="s" style="left:812px;top:212px;width:10px;height:10px"></div><div class="lab" style="left:800px;top:186px">CP353108</div>
+ <div class="s" style="left:110px;top:512px;width:16px;height:16px"></div><div class="lab" style="left:92px;top:536px">CP351003</div>
+ <div class="s" style="left:350px;top:478px;width:14px;height:14px"></div><div class="lab" style="left:332px;top:500px">CP353002</div>
+ <div class="s" style="left:240px;top:640px;width:6px;height:6px"></div><div class="s" style="left:470px;top:610px;width:7px;height:7px"></div><div class="s" style="left:700px;top:660px;width:5px;height:5px"></div><div class="s" style="left:820px;top:560px;width:6px;height:6px"></div>
+ <div class="cap"><b>CP352001 Data Structures</b><br>ตกในปี 2/1 · ลงใหม่ปี 2/2 · อยู่บนเส้นทางวิกฤต</div>
+</div>
+</body></html>

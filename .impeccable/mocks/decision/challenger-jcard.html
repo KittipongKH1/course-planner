@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=Itim&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;background:#f5f7fb;color:#1d3a8a;font-family:Anuphan,sans-serif}
+.top{height:60px;background:#fff;border-bottom:1px solid #dbe3f3;display:flex;align-items:center;padding:0 32px;gap:32px}
+.brand{font-weight:700;font-size:17px}.brand small{font-weight:400;font-size:12px;color:#6a7690;margin-left:8px}
+.tab{font-size:15px;color:#6a7690}.tab.on{color:#1d3a8a;font-weight:600;border-bottom:3px solid #d8b23a;padding-bottom:4px}
+.spine{margin:22px 32px 18px;background:#1d3a8a;color:#fff;border-radius:6px;padding:14px 22px;display:flex;align-items:center;gap:30px}
+.spine b{font-size:30px}.spine span{font-size:14px;opacity:.85}.spine .stripe{margin-left:auto;width:120px;height:10px;background:#d8b23a;border-radius:2px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding:0 32px}
+.card{background:#fff;border:1px solid #dbe3f3;border-radius:8px;padding:16px 18px}
+.side{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #1d3a8a;padding-bottom:6px;margin-bottom:6px}
+.side b{font-size:18px}.side span{font-size:13px;color:#6a7690}
+.tape{height:8px;background:#eef2fa;border-radius:4px;margin:8px 0 10px;position:relative}.tape i{display:block;height:100%;background:#1d3a8a;border-radius:4px}
+.tape.over i{background:#c0392b}
+.tr{display:flex;justify-content:space-between;font-family:Itim,cursive;font-size:17px;padding:6px 0;border-bottom:1px solid #e8edf7}
+.tr small{font-family:Anuphan;font-size:12px;color:#6a7690;margin-right:8px}
+.tr.pen{color:#9aa4b5}.tr.x{text-decoration:line-through;color:#c0392b}
+.foot{font-size:12px;color:#6a7690;margin-top:8px}
+.alert{margin:18px 32px 0;background:#fff;border:1px solid #f0d9a0;border-radius:8px;padding:12px 16px;font-size:14px;color:#7a5a00}
+</style></head><body>
+<div class="top"><div class="brand">Course Planner<small>วิทยาลัยการคอมพิวเตอร์ มข.</small></div>
+ <div class="tab">เป้าหมาย</div><div class="tab on">แผนการเรียน</div><div class="tab">เส้นทางวิกฤต</div><div class="tab">ผลการเรียน</div><div class="tab">ถาม-ตอบ</div></div>
+<div class="spine"><b>จบ ปี 4 เทอม 2</b><span>54 / 128 หน่วยกิต · วิชาเลือก 15/15 · AI + Data</span><div class="stripe"></div></div>
+<div class="cards">
+ <div class="card"><div class="side"><b>ปี 2 · หน้า A</b><span>19 / 19 นก.</span></div><div class="tape"><i style="width:100%"></i></div>
+  <div class="tr"><span><small>CP352002</small>UX Design</span><span>3</span></div>
+  <div class="tr x"><span><small>CP352001</small>Data Structures</span><span>3</span></div>
+  <div class="tr"><span><small>SC402101</small>Linear Algebra</span><span>3</span></div>
+  <div class="tr"><span><small>SC602005</small>Prob &amp; Stat</span><span>3</span></div>
+  <div class="foot">ภาระ 22 / 22</div></div>
+ <div class="card"><div class="side"><b>ปี 2 · หน้า B</b><span>18 / 19 นก.</span></div><div class="tape"><i style="width:95%"></i></div>
+  <div class="tr"><span><small>CP352001</small>Data Structures (ใหม่)</span><span>3</span></div>
+  <div class="tr pen"><span><small>CP352003</small>Database System</span><span>3</span></div>
+  <div class="tr pen"><span><small>CP352005</small>Computer Networks</span><span>3</span></div>
+  <div class="tr pen"><span><small>SC402401</small>Discrete Math</span><span>3</span></div>
+  <div class="foot">ภาระ 19 / 22</div></div>
+ <div class="card"><div class="side"><b>ปี 3 · หน้า A</b><span>18 / 19 นก.</span></div><div class="tape"><i style="width:95%"></i></div>
+  <div class="tr pen"><span><small>CP352006</small>Algorithms</span><span>3</span></div>
+  <div class="tr pen"><span><small>CP353002</small>Software Design</span><span>3</span></div>
+  <div class="tr pen"><span><small>CP353003</small>Artificial Intelligence</span><span>3</span></div>
+  <div class="tr pen"><span><small>CP353102</small>Machine Learning</span><span>3</span></div>
+  <div class="foot">ภาระ 21 / 22</div></div>
+ <div class="card"><div class="side"><b>ปี 3 · หน้า B</b><span>16 / 19 นก.</span></div><div class="tape"><i style="width:84%"></i></div>
+  <div class="tr pen"><span><small>CP353004</small>Software Engineering</span><span>3</span></div>
+  <div class="tr pen"><span><small>CP353005</small>Theory of Computation</span><span>3</span></div>
+  <div class="tr pen"><span><small>CP353108</small>Deep Learning</span><span>3</span></div>
+  <div class="tr pen"><span><small>CP353764</small>Research Methodology</span><span>3</span></div>
+  <div class="foot">ภาระ 18 / 22</div></div>
+</div>
+<div class="alert">หน้า A ของปี 2 เต็มพอดี — ถ้าเพิ่มวิชาอีก 1 วิชา ภาระจะเกินงบ 20 ชม./สัปดาห์</div>
+</body></html>

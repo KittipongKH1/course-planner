@@ -6,6 +6,7 @@ import coursesRouter from './routes/courses.js';
 import intentRouter from './routes/intent.js';
 import transcriptRouter from './routes/transcript.js';
 import planRouter from './routes/plan.js';
+import ragRouter from './routes/rag.js';
 
 const app = express();
 app.use(cors());
@@ -16,6 +17,7 @@ app.use('/api', coursesRouter); // /api/courses, /api/tracks
 app.use('/api/intent', intentRouter); // /api/intent/extract
 app.use('/api/transcript', transcriptRouter); // /api/transcript, /api/transcript/:studentCode
 app.use('/api/plan', planRouter); // /api/plan/generate
+app.use('/api/rag', ragRouter); // /api/rag/ask (ถาม-ตอบหลักสูตร)
 
 const PORT = process.env.PORT ?? 3001;
 app.listen(PORT, () => {

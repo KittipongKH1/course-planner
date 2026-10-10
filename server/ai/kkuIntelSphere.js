@@ -4,25 +4,27 @@ import 'dotenv/config';
 
 const BASE_URL = process.env.KKU_BASE_URL ?? 'https://gen.ai.kku.ac.th/api/v1';
 const API_KEY = process.env.API_KEY ?? '';
-// gpt-5-nano ยืนยันแล้วว่าตอบ JSON สะอาด (ไม่ห่อ ```json fence) และมี endpoint พร้อมใช้งานจริงบน gateway นี้
-// (ทดสอบ 2026-08-24: gemini-2.5-flash-lite ไม่มี endpoint ให้บริการ, gemini-2.5-flash ใช้ได้แต่ห่อ fence)
-const MODEL = process.env.KKU_MODEL ?? 'gpt-5-nano';
+// ทดสอบ 2026-10-11: gpt-5-nano ไม่อยู่ในรายชื่อโมเดลแล้ว (401 "Invalid model") — gemini-3.5-flash-lite ตอบ JSON ได้
+// และตอบ RAG ภาษาไทยถูกต้องใน ~2 วินาที (gemini-3.8-flash ละเอียดกว่าแต่ช้ากว่า ~2-3 เท่า)
+// รายชื่อโมเดลที่ key ใช้ได้: `npm run ai:list-models`
+const MODEL = process.env.KKU_MODEL ?? 'gemini-3.5-flash-lite';
 const TIMEOUT_MS = 15000;
 
 export class KKUIntelSphereError extends Error {}
 
 /**
  * เรียก chat completion แล้วบังคับให้ตอบเป็น JSON object เดียว
- * @param {{systemPrompt: string, userText: string}} args
+ * @param {{systemPrompt: string, userText: string, timeoutMs?: number}} args
+ *   timeoutMs — งานที่ prompt ยาว (เช่น RAG ที่แนบเอกสารหลายชิ้น) ใช้เวลานานกว่าการสกัด intent
  * @returns {Promise<object>} JSON ที่ parse แล้ว
  */
-export async function chatJSON({ systemPrompt, userText }) {
+export async function chatJSON({ systemPrompt, userText, timeoutMs = TIMEOUT_MS }) {
   if (!API_KEY) {
     throw new KKUIntelSphereError('API_KEY is not set (.env)');
   }
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   let res;
 
@@ -47,7 +49,7 @@ export async function chatJSON({ systemPrompt, userText }) {
   } catch (err) {
     if (err.name === 'AbortError') {
       throw new KKUIntelSphereError(
-        `KKUIntelSphere request timed out after ${TIMEOUT_MS}ms`
+        `KKUIntelSphere request timed out after ${timeoutMs}ms`
       );
     }
 

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=Mali:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;background:#fbfcff;color:#13224f;font-family:Anuphan,sans-serif}
+.top{height:64px;background:#1d3a8a;color:#fff;display:flex;align-items:center;padding:0 32px;gap:40px}
+.brand{font-weight:700;font-size:17px}.brand small{display:block;font-weight:400;font-size:12px;opacity:.75}
+.tabs{display:flex;gap:4px;height:100%}
+.tab{display:flex;align-items:center;padding:0 18px;font-size:15px;opacity:.78}
+.tab.on{opacity:1;font-weight:600;box-shadow:inset 0 -4px 0 #dff26a}
+.user{margin-left:auto;font-size:13px;opacity:.85}
+.wrap{display:grid;grid-template-columns:1fr 340px;gap:28px;padding:28px 32px}
+.head{display:flex;align-items:flex-end;gap:36px;margin-bottom:18px}
+.kicker{font-size:14px;color:#4b5a86}
+.big{font-size:76px;font-weight:700;line-height:.95;color:#2f54eb;letter-spacing:-1px}
+.big u{text-decoration:none;background:linear-gradient(transparent 72%,#dff26a 72%,#dff26a 92%,transparent 92%)}
+.facts{display:flex;gap:28px;padding-bottom:10px}
+.fact b{display:block;font-size:26px;color:#1d3a8a}.fact span{font-size:13px;color:#4b5a86}
+.strip{display:flex;gap:4px;margin:6px 0 16px}
+.strip div{height:30px;border-radius:6px;background:#e6eeff;color:#1d3a8a;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.strip .now{background:#1d3a8a;color:#fff}
+.terms{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.term{background:#fff;border:1px solid #d7e2ff;border-radius:12px;padding:14px 14px 10px}
+.term h4{display:flex;justify-content:space-between;font-size:15px;margin-bottom:4px}.term h4 span{font-weight:500;color:#4b5a86;font-size:13px}
+.load{height:5px;border-radius:3px;background:#e6eeff;margin:6px 0 10px}.load i{display:block;height:100%;border-radius:3px;background:#2f54eb}
+.c{padding:7px 0;border-top:1px solid #eef2fb;font-size:14px;display:grid;grid-template-columns:76px 1fr 18px;gap:6px}
+.c code{font-family:inherit;font-size:12px;color:#4b5a86}
+.c.done em{font-style:normal;border-bottom:2px solid #1d3a8a}
+.c.plan em{font-style:normal;border-bottom:2px dashed #7f95d6}
+.c.fail em{font-style:normal;text-decoration:line-through 2px #d43d3d;color:#8a3030}
+.c.retake em{font-style:normal;border-bottom:4px double #2f54eb}
+.c.crit em{background:linear-gradient(transparent 55%,#dff26a 55%)}
+.c.sel{background:#e6eeff;margin:0 -8px;padding:7px 8px;border-radius:8px}
+.note{border-left:2px solid #2f54eb;padding:4px 0 4px 18px;font-family:Mali,cursive;color:#2f54eb}
+.note h3{font-family:Anuphan;font-size:13px;color:#4b5a86;font-weight:500;margin-bottom:8px}
+.note p{font-size:19px;line-height:1.5;margin-bottom:12px}
+.chain{display:flex;flex-direction:column;gap:6px;margin:6px 0 18px}
+.chain span{font-size:17px}.chain span:before{content:"↳ ";color:#7f95d6}
+.legend{margin-top:22px;font-family:Anuphan;font-size:13px;color:#4b5a86;display:grid;gap:8px}
+.legend em{font-style:normal;color:#13224f;margin-right:8px}
+.warn{margin-top:18px;font-family:Anuphan;background:#fff;border:1px solid #f1c9c9;border-radius:10px;padding:10px 12px;font-size:13px;color:#8a3030}
+</style></head><body>
+<div class="top">
+ <div class="brand">Course Planner<small>วิทยาลัยการคอมพิวเตอร์ มหาวิทยาลัยขอนแก่น · หลักสูตร 2565</small></div>
+ <div class="tabs"><div class="tab">เป้าหมาย</div><div class="tab on">แผนการเรียน</div><div class="tab">เส้นทางวิกฤต</div><div class="tab">ผลการเรียน</div><div class="tab">ถาม-ตอบหลักสูตร</div></div>
+ <div class="user">สายหลัก AI Engineer · สายรอง Data · 20 ชม./สัปดาห์</div>
+</div>
+<div class="wrap">
+ <main>
+  <div class="head">
+   <div><div class="kicker">ถ้าเป็นไปตามแผนนี้ คุณจะจบ</div><div class="big"><u>ปี 4 เทอม 2</u></div></div>
+   <div class="facts">
+    <div class="fact"><b>54 / 128</b><span>หน่วยกิตสะสม</span></div>
+    <div class="fact"><b>15 / 15</b><span>วิชาเลือกสาขา</span></div>
+    <div class="fact"><b>1</b><span>วิชาต้องลงใหม่</span></div>
+   </div>
+  </div>
+  <div class="strip">
+   <div style="flex:19">1/1</div><div style="flex:19">1/2</div><div style="flex:19">2/1</div><div class="now" style="flex:19">2/2 ตอนนี้</div><div style="flex:18">3/1</div><div style="flex:16">3/2</div><div style="flex:9">4/1</div><div style="flex:6">4/2</div>
+  </div>
+  <div class="terms">
+   <div class="term"><h4>ปี 2 เทอม 1 <span>19 นก.</span></h4><div class="load"><i style="width:100%"></i></div>
+    <div class="c done"><code>CP352002</code><em>User Experience Design</em></div>
+    <div class="c fail"><code>CP352001</code><em>Data Structures</em></div>
+    <div class="c done"><code>SC402101</code><em>Linear Algebra 1</em></div>
+    <div class="c done"><code>SC602005</code><em>Probability and Statistics</em></div>
+    <div class="c done"><code>CP351101</code><em>Computational Science</em></div></div>
+   <div class="term"><h4>ปี 2 เทอม 2 <span>18 นก.</span></h4><div class="load"><i style="width:86%"></i></div>
+    <div class="c retake crit"><code>CP352001</code><em>Data Structures</em></div>
+    <div class="c plan"><code>CP352003</code><em>Database Management System</em></div>
+    <div class="c plan"><code>CP352005</code><em>Computer Networks</em></div>
+    <div class="c plan"><code>SC402401</code><em>Discrete Mathematics</em></div>
+    <div class="c plan"><code>CP352101</code><em>Intro to Data Science</em></div></div>
+   <div class="term"><h4>ปี 3 เทอม 1 <span>18 นก.</span></h4><div class="load"><i style="width:90%"></i></div>
+    <div class="c plan crit"><code>CP352006</code><em>Analysis of Algorithms</em></div>
+    <div class="c plan crit"><code>CP353002</code><em>Principles of Software Design</em></div>
+    <div class="c plan"><code>CP353003</code><em>Artificial Intelligence</em></div>
+    <div class="c plan"><code>CP353001</code><em>Operating Systems</em></div>
+    <div class="c plan"><code>CP353102</code><em>Intro to Machine Learning</em></div></div>
+   <div class="term"><h4>ปี 3 เทอม 2 <span>16 นก.</span></h4><div class="load"><i style="width:72%"></i></div>
+    <div class="c plan crit sel"><code>CP353004</code><em>Software Engineering</em></div>
+    <div class="c plan"><code>CP353005</code><em>Theory of Computation</em></div>
+    <div class="c plan"><code>CP353108</code><em>Neural Network &amp; Deep Learning</em></div>
+    <div class="c plan"><code>CP353764</code><em>Research Methodology</em></div></div>
+  </div>
+ </main>
+ <aside class="note">
+  <h3>ทำไม CP353004 อยู่ปี 3 เทอม 2</h3>
+  <p>ต้องผ่าน Principles of Software Design ก่อน ซึ่งเร็วสุดคือปี 3 เทอม 1</p>
+  <div class="chain"><span>CP351003 OOP — ผ่านแล้ว</span><span>CP353002 Software Design — ปี 3/1</span><span>CP353004 Software Engineering — ปี 3/2</span><span>CP354771 Project I — ปี 4/1</span></div>
+  <p>อยู่บนเส้นทางวิกฤต ถ้าเลื่อน จะจบช้า 1 เทอม</p>
+  <div class="legend"><div><em style="border-bottom:2px solid #1d3a8a">ผ่านแล้ว</em><em style="border-bottom:2px dashed #7f95d6">ในแผน</em><em style="text-decoration:line-through 2px #d43d3d">ตก/ถอน</em><em style="border-bottom:4px double #2f54eb">ลงใหม่</em></div><div><em style="background:linear-gradient(transparent 55%,#dff26a 55%)">เส้นทางวิกฤต</em></div></div>
+  <div class="warn">ตก CP352001 ทำให้ CP352006 และอีก 6 วิชาเลื่อนตาม — ระบบจัดให้ลงใหม่ปี 2/2 แล้วยังจบทัน</div>
+ </aside>
+</div>
+</body></html>

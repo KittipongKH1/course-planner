@@ -18,6 +18,14 @@ export function extractIntentRemote(text) {
   return postJSON('/intent/extract', { text });
 }
 
+/**
+ * ถาม-ตอบหลักสูตรด้วย RAG (server/rag/ragService.js)
+ * @returns {Promise<{answer: string, citedIds: string[], sources: object[], source: 'ai'|'fallback'|'no-match'}>}
+ */
+export function askCurriculumRemote({ question, history, student }) {
+  return postJSON('/rag/ask', { question, history, student });
+}
+
 /** @returns {Promise<object>} plan result shape เดียวกับ generatePlan/generateOfficialPlan/runGA */
 export function generatePlanRemote({ completed, failed, constraints, method }) {
   return postJSON('/plan/generate', { completed, failed, constraints, method });

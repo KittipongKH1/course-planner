@@ -4,3 +4,6 @@ dist/
 server/data/*.db
 server/data/*.db-*
 .claude/
+# Impeccable: log ของหน้าเลือก direction และภาพแคปตอนรีวิว เป็นไฟล์ชั่วคราวของแต่ละ session
+.impeccable/questions/
+.impeccable/review/

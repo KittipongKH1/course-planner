@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;background:#f1f5fb;color:#0f172a;font-family:"Noto Sans Thai",sans-serif;display:grid;grid-template-columns:248px 1fr}
+nav{background:#fff;border-right:1px solid #e2e8f0;padding:22px 16px}
+.brand{font-weight:700;font-size:16px;color:#2563eb;padding:0 8px 20px}.brand small{display:block;color:#64748b;font-weight:400;font-size:12px}
+.n{padding:10px 12px;border-radius:8px;font-size:14px;color:#334155;margin-bottom:2px}.n.on{background:#eff6ff;color:#2563eb;font-weight:600}
+main{padding:28px 32px}
+h1{font-size:24px;margin-bottom:4px}.sub{color:#64748b;font-size:14px;margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px}
+.card span{font-size:13px;color:#64748b}.card b{display:block;font-size:26px;margin-top:4px}.card.p b{color:#2563eb}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.term{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px}
+.term h4{font-size:14px;display:flex;justify-content:space-between;margin-bottom:10px}.term h4 span{color:#64748b;font-weight:400}
+.c{border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:13px}
+.c small{display:block;color:#64748b;font-size:11px}
+.c.ok{border-left:3px solid #16a34a}.c.bad{border-left:3px solid #dc2626}.c.crit{border-left:3px solid #f59e0b}
+.pill{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;background:#fef3c7;color:#92400e;margin-top:4px}
+</style></head><body>
+<nav><div class="brand">Course Planner<small>วิทยาลัยการคอมพิวเตอร์ มข.</small></div>
+ <div class="n">เป้าหมาย</div><div class="n on">แผนการเรียน</div><div class="n">เส้นทางวิกฤต</div><div class="n">ผลการเรียน</div><div class="n">ถาม-ตอบหลักสูตร</div></nav>
+<main><h1>แผนการเรียน</h1><div class="sub">AI Engineer + Data Scientist · 20 ชม./สัปดาห์ · หลักสูตร 2565</div>
+ <div class="cards"><div class="card p"><span>คาดว่าจบ</span><b>ปี 4 เทอม 2</b></div><div class="card"><span>หน่วยกิตสะสม</span><b>54 / 128</b></div><div class="card"><span>วิชาเลือกสาขา</span><b>15 / 15</b></div><div class="card"><span>ต้องลงใหม่</span><b>1 วิชา</b></div></div>
+ <div class="grid">
+  <div class="term"><h4>ปี 2 เทอม 1<span>19 นก.</span></h4><div class="c ok">User Experience Design<small>CP352002 · ผ่าน</small></div><div class="c bad">Data Structures<small>CP352001 · ตก</small></div><div class="c ok">Linear Algebra 1<small>SC402101 · ผ่าน</small></div></div>
+  <div class="term"><h4>ปี 2 เทอม 2<span>18 นก.</span></h4><div class="c crit">Data Structures<small>CP352001 · ลงใหม่</small><span class="pill">เส้นทางวิกฤต</span></div><div class="c">Database Management System<small>CP352003</small></div><div class="c">Computer Networks<small>CP352005</small></div></div>
+  <div class="term"><h4>ปี 3 เทอม 1<span>18 นก.</span></h4><div class="c crit">Analysis of Algorithms<small>CP352006</small><span class="pill">เส้นทางวิกฤต</span></div><div class="c">Artificial Intelligence<small>CP353003</small></div><div class="c">Intro to Machine Learning<small>CP353102</small></div></div>
+  <div class="term"><h4>ปี 3 เทอม 2<span>16 นก.</span></h4><div class="c crit">Software Engineering<small>CP353004</small><span class="pill">เส้นทางวิกฤต</span></div><div class="c">Theory of Computation<small>CP353005</small></div><div class="c">Neural Network &amp; Deep Learning<small>CP353108</small></div></div>
+ </div></main>
+</body></html>

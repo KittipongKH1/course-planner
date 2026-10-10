@@ -4,15 +4,16 @@
 
 import { TRACKS } from './curriculum.js';
 
+// ไอคอนของแต่ละสายอยู่ใน GoalsPage.jsx (lucide) — ไฟล์นี้เก็บเฉพาะข้อมูล
 export const TRACK_PROFILES = {
-  FRONTEND: { icon: '🎨', summary: 'สร้างหน้าเว็บ/UI ที่ผู้ใช้เห็นและโต้ตอบ', skills: ['HTML/CSS', 'JavaScript/React', 'UX Design'] },
-  FULLSTACK: { icon: '🌐', summary: 'พัฒนาเว็บแอปครบทั้งหน้าบ้าน หลังบ้าน และฐานข้อมูล', skills: ['Web Framework', 'Database', 'API Design'] },
-  DATA: { icon: '📊', summary: 'วิเคราะห์และจัดการข้อมูลเพื่อหาข้อมูลเชิงลึก', skills: ['Python/SQL', 'Statistics', 'Data Pipeline'] },
-  AI: { icon: '🤖', summary: 'พัฒนาโมเดล Machine Learning และระบบอัจฉริยะ', skills: ['Machine Learning', 'Deep Learning', 'Math'] },
-  DEVOPS: { icon: '⚙️', summary: 'ดูแลเซิร์ฟเวอร์ คลาวด์ และระบบ deploy อัตโนมัติ', skills: ['Linux/Network', 'Cloud', 'CI/CD & Script'] },
-  SECURITY: { icon: '🛡️', summary: 'ปกป้องระบบและเครือข่ายจากภัยคุกคาม', skills: ['Network Security', 'Cryptography', 'Pentest'] },
-  GAMEDEV: { icon: '🎮', summary: 'สร้างเกม แอนิเมชัน และสื่อดิจิทัลแบบโต้ตอบ', skills: ['Game Engine', 'Graphics', 'Animation'] },
-  MOBILE: { icon: '📱', summary: 'พัฒนาแอปบน Android / iOS', skills: ['Mobile Framework', 'Mobile UI', 'API Integration'] },
+  FRONTEND: { summary: 'สร้างหน้าเว็บ/UI ที่ผู้ใช้เห็นและโต้ตอบ', skills: ['HTML/CSS', 'JavaScript/React', 'UX Design'] },
+  FULLSTACK: { summary: 'พัฒนาเว็บแอปครบทั้งหน้าบ้าน หลังบ้าน และฐานข้อมูล', skills: ['Web Framework', 'Database', 'API Design'] },
+  DATA: { summary: 'วิเคราะห์และจัดการข้อมูลเพื่อหาข้อมูลเชิงลึก', skills: ['Python/SQL', 'Statistics', 'Data Pipeline'] },
+  AI: { summary: 'พัฒนาโมเดล Machine Learning และระบบอัจฉริยะ', skills: ['Machine Learning', 'Deep Learning', 'Math'] },
+  DEVOPS: { summary: 'ดูแลเซิร์ฟเวอร์ คลาวด์ และระบบ deploy อัตโนมัติ', skills: ['Linux/Network', 'Cloud', 'CI/CD & Script'] },
+  SECURITY: { summary: 'ปกป้องระบบและเครือข่ายจากภัยคุกคาม', skills: ['Network Security', 'Cryptography', 'Pentest'] },
+  GAMEDEV: { summary: 'สร้างเกม แอนิเมชัน และสื่อดิจิทัลแบบโต้ตอบ', skills: ['Game Engine', 'Graphics', 'Animation'] },
+  MOBILE: { summary: 'พัฒนาแอปบน Android / iOS', skills: ['Mobile Framework', 'Mobile UI', 'API Integration'] },
 };
 
 // คำตอบเป็นมาตราส่วน 1 (ไม่ใช่เลย) – 5 (ใช่มาก) / weights = ความเกี่ยวข้องของคำถามกับแต่ละสาย (0–1)

@@ -9,13 +9,17 @@ Phase 2–3 ใน `แผนพัฒนา-Phase2-3.md`
 - **Frontend:** React + Vite (`src/`)
 - **Backend:** Node/Express + SQLite (`node:sqlite`, มากับ Node ≥22 อยู่แล้ว ไม่ต้อง install native module) (`server/`)
 - **AI:** KKUIntelSphere gateway (`server/ai/`) — มี rule-based fallback อัตโนมัติเมื่อ AI เรียกไม่สำเร็จ
+- **RAG ถาม-ตอบหลักสูตร (`server/rag/`):** แปลง `โครงสร้างหลักสูตร.md` เป็นเอกสารรายวิชา + หมวดอื่นของหลักสูตร
+  (`knowledgeBase.js`) → ค้นด้วย BM25 + ตัดคำไทยด้วย `Intl.Segmenter` (`retriever.js`) → ให้ LLM ตอบพร้อมอ้างอิง
+  (`ragService.js`, `POST /api/rag/ask`) — ถ้า AI ใช้ไม่ได้จะแสดงข้อความจากเอกสารที่ค้นได้แทน
 - **Optimization Engine:** Genetic Algorithm (`server/optimizer/ga.js`) เทียบกับ greedy heuristic เดิม (`src/utils/scheduler.js`)
+- **เป้าหมาย/ข้อจำกัดของแผน:** รับผ่านฟอร์มหน้า "เป้าหมาย" (`src/components/GoalsPage.jsx`) ไม่ได้สกัดจากแชท
 
 ## เริ่มต้นใช้งาน
 
 ```bash
 npm install
-cp .env.example .env        # แล้วกรอก API_KEY จริง (ยืนยันแล้วว่าใช้ได้กับ model gpt-5-nano)
+cp .env.example .env        # แล้วกรอก API_KEY จริง (ค่าเริ่มต้น model: gemini-3.5-flash-lite)
 npm run db:migrate          # โหลดข้อมูลหลักสูตรเข้า SQLite (ครั้งแรกเท่านั้น)
 npm run dev:all             # รัน frontend (Vite, port 5173) + backend (Express, port 3001) พร้อมกัน
 ```
@@ -27,9 +31,10 @@ npm run dev:all             # รัน frontend (Vite, port 5173) + backend (Ex
 
 | คำสั่ง | ใช้ทำอะไร |
 |---|---|
-| `npm run test` | รัน Vitest ทั้งหมด (graph, scheduler, GA, AI fallback) |
+| `npm run test` | รัน Vitest ทั้งหมด (graph, scheduler, GA, AI fallback, RAG) |
 | `npm run ai:test-connection` | ยืนยัน shape ของ KKUIntelSphere response ก่อนใช้งานจริง |
 | `npm run optimizer:benchmark` | เทียบ greedy vs GA บน mock profile หลายแบบ (ผลลัพธ์เอาไปเขียนเล่มได้) |
+| `npm run rag:eval` | วัดความแม่นของ retriever (Hit@1/3/5, MRR) บนชุดคำถาม `server/rag/eval/questions.json` |
 | `npm run server` | รัน backend อย่างเดียว |
 | `npm run dev` | รัน frontend อย่างเดียว |
 
