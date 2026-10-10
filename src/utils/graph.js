@@ -1,112 +1,135 @@
 import { COURSES, COURSE_MAP } from '../data/curriculum.js';
 
+// กราฟหลักสูตรเป็นข้อมูลคงที่ (COURSES ไม่เปลี่ยนระหว่างรัน) จึง cache ผลคำนวณระดับ module ไว้
+// ไม่ต้องคำนวณใหม่ทุกครั้งที่ scheduler/GA/fallback เรียก
+const cache = {};
+function memo(key, fn) {
+  if (!(key in cache)) cache[key] = fn();
+  return cache[key];
+}
+
 // Build forward (prereq -> dependents) adjacency
 export function buildDependentsMap() {
-  const map = {};
-  COURSES.forEach((c) => { map[c.code] = []; });
-  COURSES.forEach((c) => {
-    c.prereq.forEach((p) => {
-      if (map[p]) map[p].push(c.code);
+  return memo('dependents', () => {
+    const map = {};
+    COURSES.forEach((c) => { map[c.code] = []; });
+    COURSES.forEach((c) => {
+      c.prereq.forEach((p) => {
+        if (map[p]) map[p].push(c.code);
+      });
     });
+    return map;
   });
-  return map;
 }
 
 // Topological order (Kahn's algorithm). Throws if a cycle is found (shouldn't happen).
 export function topoOrder() {
-  const inDegree = {};
-  COURSES.forEach((c) => { inDegree[c.code] = 0; });
-  COURSES.forEach((c) => {
-    c.prereq.forEach((p) => {
-      if (inDegree[c.code] !== undefined) inDegree[c.code] += 1;
-    });
+  return memo('topo', () => {
+    const inDegree = {};
+    COURSES.forEach((c) => { inDegree[c.code] = c.prereq.filter((p) => COURSE_MAP[p]).length; });
+    const queue = COURSES.filter((c) => inDegree[c.code] === 0).map((c) => c.code);
+    const order = [];
+    const dependents = buildDependentsMap();
+    while (queue.length) {
+      const code = queue.shift();
+      order.push(code);
+      dependents[code].forEach((dep) => {
+        inDegree[dep] -= 1;
+        if (inDegree[dep] === 0) queue.push(dep);
+      });
+    }
+    if (order.length !== COURSES.length) throw new Error('Curriculum graph has a prerequisite cycle');
+    return order;
   });
-  const queue = COURSES.filter((c) => inDegree[c.code] === 0).map((c) => c.code);
-  const order = [];
-  const dependents = buildDependentsMap();
-  while (queue.length) {
-    const code = queue.shift();
-    order.push(code);
-    (dependents[code] || []).forEach((dep) => {
-      inDegree[dep] -= 1;
-      if (inDegree[dep] === 0) queue.push(dep);
-    });
-  }
-  return order;
 }
 
-// Longest path length (in # of courses) ending at each node -> critical path / depth
+// Longest path length (in # of edges) ending at each node -> critical path / depth
 export function computeDepths() {
-  const order = topoOrder();
-  const depth = {};
-  order.forEach((code) => {
-    const c = COURSE_MAP[code];
-    const prereqDepths = c.prereq.map((p) => (depth[p] ?? 0) + 1);
-    depth[code] = prereqDepths.length ? Math.max(...prereqDepths) : 0;
+  return memo('depths', () => {
+    const depth = {};
+    topoOrder().forEach((code) => {
+      const prereqDepths = COURSE_MAP[code].prereq.map((p) => (depth[p] ?? 0) + 1);
+      depth[code] = prereqDepths.length ? Math.max(...prereqDepths) : 0;
+    });
+    return depth;
   });
-  return depth;
+}
+
+// Longest path length (in # of edges) starting at each node — ใช้คู่กับ computeDepths เพื่อหา delay factor
+export function computeHeights() {
+  return memo('heights', () => {
+    const dependents = buildDependentsMap();
+    const height = {};
+    [...topoOrder()].reverse().forEach((code) => {
+      const kidHeights = dependents[code].map((k) => height[k] + 1);
+      height[code] = kidHeights.length ? Math.max(...kidHeights) : 0;
+    });
+    return height;
+  });
 }
 
 // Count of ALL downstream dependents (direct + transitive) for each course.
 // A high count = "bottleneck" course: failing/withdrawing from it stalls many future courses.
+// = "Blocking factor" ใน Curricular Analytics ของ Heileman et al. (2018)
 export function computeDownstreamCounts() {
-  const dependents = buildDependentsMap();
-  const memo = {};
-  function dfs(code, visiting) {
-    if (memo[code] !== undefined) return memo[code];
-    if (visiting.has(code)) return 0; // guard against accidental cycles
-    visiting.add(code);
-    const kids = dependents[code] || [];
-    const set = new Set();
-    kids.forEach((k) => {
-      set.add(k);
-      dfs(k, visiting).forEach; // no-op, kept for clarity
-      const subKids = dfsSet(k, visiting);
-      subKids.forEach((s) => set.add(s));
+  return memo('downstream', () => {
+    const counts = {};
+    COURSES.forEach((c) => { counts[c.code] = getImpactCone(c.code).length; });
+    return counts;
+  });
+}
+
+/**
+ * ตัวชี้วัดความซับซ้อนเชิงโครงสร้างของหลักสูตร ตาม Heileman, Abdallah, Slim & Hickman (2018)
+ * "Curricular Analytics: A Framework for Quantifying the Impact of Curricular Reforms and
+ * Pedagogical Innovations" (อ้างอิง [2] ในเล่ม progress1.md)
+ *  - blocking factor b(v) = จำนวนวิชาที่ลงไม่ได้ถ้าไม่ผ่าน v (วิชาที่ reach ได้จาก v)
+ *  - delay factor   d(v) = จำนวนวิชาบน path ที่ยาวที่สุดที่ผ่าน v — ถ้าตก v เส้นทางนี้จะเลื่อนทั้งเส้น
+ *  - cruciality     c(v) = b(v) + d(v)
+ *  - structural complexity ของหลักสูตร = Σ c(v)
+ * @returns {{byCourse: Record<string, {blocking: number, delay: number, cruciality: number}>, structuralComplexity: number}}
+ */
+export function computeCurricularComplexity() {
+  return memo('complexity', () => {
+    const depth = computeDepths();
+    const height = computeHeights();
+    const blocking = computeDownstreamCounts();
+    const byCourse = {};
+    let structuralComplexity = 0;
+    COURSES.forEach(({ code }) => {
+      const delay = depth[code] + height[code] + 1;
+      const cruciality = blocking[code] + delay;
+      byCourse[code] = { blocking: blocking[code], delay, cruciality };
+      structuralComplexity += cruciality;
     });
-    visiting.delete(code);
-    memo[code] = set.size;
-    return set.size;
-  }
-  function dfsSet(code, visiting) {
-    if (visiting.has(code)) return new Set();
-    visiting.add(code);
-    const kids = dependents[code] || [];
-    const set = new Set();
-    kids.forEach((k) => {
-      set.add(k);
-      dfsSet(k, visiting).forEach((s) => set.add(s));
-    });
-    visiting.delete(code);
-    return set;
-  }
-  const counts = {};
-  COURSES.forEach((c) => { counts[c.code] = dfsSet(c.code, new Set()).size; });
-  return counts;
+    return { byCourse, structuralComplexity };
+  });
 }
 
 // The "critical path" itself: the single longest prerequisite chain in the whole curriculum.
 export function computeCriticalPath() {
-  const depth = computeDepths();
-  const order = topoOrder();
-  let endCode = order[0];
-  order.forEach((code) => {
-    if ((depth[code] ?? 0) >= (depth[endCode] ?? 0)) endCode = code;
-  });
-  // walk backwards choosing the deepest prereq each time
-  const path = [];
-  let cur = endCode;
-  while (cur) {
-    path.unshift(cur);
-    const c = COURSE_MAP[cur];
-    if (!c.prereq.length) break;
-    let best = c.prereq[0];
-    c.prereq.forEach((p) => {
-      if ((depth[p] ?? 0) > (depth[best] ?? 0)) best = p;
+  return memo('criticalPath', () => {
+    const depth = computeDepths();
+    const order = topoOrder();
+    let endCode = order[0];
+    order.forEach((code) => {
+      if (depth[code] >= depth[endCode]) endCode = code;
     });
-    cur = best;
-  }
-  return path;
+    // walk backwards choosing the deepest prereq each time
+    const path = [];
+    let cur = endCode;
+    while (cur) {
+      path.unshift(cur);
+      const c = COURSE_MAP[cur];
+      if (!c.prereq.length) break;
+      let best = c.prereq[0];
+      c.prereq.forEach((p) => {
+        if ((depth[p] ?? 0) > (depth[best] ?? 0)) best = p;
+      });
+      cur = best;
+    }
+    return path;
+  });
 }
 
 // Given a course code that a student failed/withdrew from, find every course
@@ -128,6 +151,5 @@ export function getImpactCone(code) {
 }
 
 export function isBottleneck(code, threshold = 3) {
-  const counts = computeDownstreamCounts();
-  return (counts[code] ?? 0) >= threshold;
+  return (computeDownstreamCounts()[code] ?? 0) >= threshold;
 }

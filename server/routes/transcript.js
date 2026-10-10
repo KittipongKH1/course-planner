@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { db, getOrCreateUser } from '../db.js';
 import { analyzeTranscriptSmart } from '../ai/provider.js';
+import { COURSE_MAP } from '../../src/data/curriculum.js';
 
 const router = Router();
 
@@ -23,6 +24,10 @@ router.post('/', async (req, res) => {
   }
   if (!['completed', 'failed', 'withdrawn'].includes(status)) {
     return res.status(400).json({ error: "status must be 'completed' | 'failed' | 'withdrawn'" });
+  }
+  // SQLite ไม่ enforce foreign key โดย default — ตรวจเองกันรหัสวิชาที่ไม่มีในหลักสูตรหลุดเข้า DB
+  if (!COURSE_MAP[courseCode]) {
+    return res.status(400).json({ error: `unknown courseCode: ${courseCode}` });
   }
 
   const user = getOrCreateUser(studentCode, email ?? null);

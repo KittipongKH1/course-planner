@@ -3,6 +3,7 @@
 // Node = รายวิชา (course), Edge = Prerequisite
 // `load` = ดัชนีภาระทางปัญญา (Cognitive Load Index) โดยประมาณ 1 (เบา) - 3 (หนัก)
 // `term` = ปี-ภาคเรียนตามแผนการศึกษาแนะนำ (ใช้เป็นค่าเริ่มต้น/baseline สำหรับ critical path)
+// `offered` (optional) = ภาคการศึกษาที่เปิดสอนจริง เช่น [1, 2] — override สมมติฐานใน offeredSemesters()
 
 export const TRACKS = {
   FRONTEND: { id: 'FRONTEND', label: 'Front-End Developer', color: '#6366f1' },
@@ -60,7 +61,7 @@ export const COURSES = [
   { code: 'CP354771', nameTh: 'โครงงานทางวิทยาการคอมพิวเตอร์ 1', nameEn: 'Computer Science Project I', credits: 3, prereq: ['CP353004'], category: 'Project', term: 41, load: 3, tracks: [] },
   { code: 'CP354772', nameTh: 'โครงงานทางวิทยาการคอมพิวเตอร์ 2', nameEn: 'Computer Science Project II', credits: 3, prereq: ['CP354771'], category: 'Project', term: 42, load: 3, tracks: [] },
   { code: 'CP002001', nameTh: 'การเตรียมความพร้อมสหกิจศึกษา', nameEn: 'Co-op Orientation', credits: 0, prereq: [], category: 'Project', term: 32, load: 1, tracks: [] },
-  { code: 'CP354785', nameTh: 'สหกิจศึกษาทางวิทยาการคอมพิวเตอร์', nameEn: 'Co-Operative Education in CS', credits: 6, prereq: ['CP002001'], category: 'Project', term: 42, load: 3, tracks: [] },
+  { code: 'CP354785', nameTh: 'สหกิจศึกษาทางวิทยาการคอมพิวเตอร์', nameEn: 'Co-Operative Education in CS', credits: 6, prereq: ['CP002001'], category: 'Project', term: 42, load: 3, tracks: [], offered: [1, 2] }, // ไปสหกิจได้ทั้งเทอมต้น/ปลาย (ดู YEAR4_PATHS)
 
   // ---------- Elective group 1: AI & Data Science ----------
   { code: 'CP351101', nameTh: 'วิทยาการคำนวณ', nameEn: 'Computational Science', credits: 3, prereq: [], category: 'Elective-AI/Data', term: 21, load: 2, tracks: ['AI', 'DATA'] },

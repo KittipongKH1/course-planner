@@ -54,3 +54,8 @@ export function extractIntent(text) {
 export function trackLabel(trackId) {
   return TRACKS[trackId]?.label ?? trackId;
 }
+
+// สายหลัก + สายรอง เช่น "AI Engineer + Data Scientist / Data Engineer"
+export function tracksLabel(tracks = []) {
+  return tracks.map(trackLabel).join(' + ');
+}

@@ -1,17 +1,17 @@
 import { useMemo } from 'react';
 import { COURSE_MAP } from '../data/curriculum.js';
-import { computeCriticalPath, computeDownstreamCounts } from '../utils/graph.js';
+import { computeCriticalPath, computeCurricularComplexity } from '../utils/graph.js';
 
-export default function CriticalPathPanel() {
+export default function CriticalPathPanel({ failed = new Set() }) {
   const criticalPath = useMemo(() => computeCriticalPath(), []);
-  const downstreamCounts = useMemo(() => computeDownstreamCounts(), []);
+  const { byCourse, structuralComplexity } = useMemo(() => computeCurricularComplexity(), []);
 
-  const topBottlenecks = useMemo(() => {
-    return Object.entries(downstreamCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8)
-      .filter(([, count]) => count > 0);
-  }, [downstreamCounts]);
+  const topCrucial = useMemo(() => {
+    return Object.entries(byCourse)
+      .filter(([, m]) => m.blocking > 0)
+      .sort((a, b) => b[1].cruciality - a[1].cruciality || b[1].blocking - a[1].blocking)
+      .slice(0, 10);
+  }, [byCourse]);
 
   return (
     <div className="panel">
@@ -25,24 +25,38 @@ export default function CriticalPathPanel() {
       <div className="critical-path-chain">
         {criticalPath.map((code, i) => (
           <span key={code} className="chain-item">
-            <span className="chain-node">{code}</span>
+            <span className="chain-node" title={COURSE_MAP[code]?.nameTh}>{code}</span>
             {i < criticalPath.length - 1 && <span className="chain-arrow">→</span>}
           </span>
         ))}
       </div>
       <div className="hint">ความยาวเส้นทางวิกฤต: {criticalPath.length} วิชาต่อเนื่องกัน</div>
 
-      <h4 style={{ marginTop: '1.25rem' }}>วิชา "คอขวด" อันดับต้น ๆ (ปลดล็อกวิชาอื่นมากที่สุด)</h4>
+      <h4 style={{ marginTop: '1.25rem' }}>วิชาที่สำคัญต่อการจบตามกำหนดที่สุด (Curricular Analytics)</h4>
+      <p className="hint">
+        วัดตามกรอบของ Heileman et al. (2018) — <strong>Blocking</strong> = จำนวนวิชาที่ลงไม่ได้ถ้าไม่ผ่านวิชานี้,{' '}
+        <strong>Delay</strong> = จำนวนวิชาบนห่วงโซ่ที่ยาวที่สุดที่ผ่านวิชานี้ (ตกแล้วเลื่อนทั้งเส้น),{' '}
+        <strong>Cruciality</strong> = Blocking + Delay · ความซับซ้อนเชิงโครงสร้างของหลักสูตรนี้ ={' '}
+        <strong>{structuralComplexity}</strong>
+      </p>
       <table className="bottleneck-table">
         <thead>
-          <tr><th>รหัสวิชา</th><th>ชื่อวิชา</th><th>ปลดล็อก</th></tr>
+          <tr>
+            <th>รหัสวิชา</th>
+            <th>ชื่อวิชา</th>
+            <th className="num">Blocking</th>
+            <th className="num">Delay</th>
+            <th className="num">Cruciality</th>
+          </tr>
         </thead>
         <tbody>
-          {topBottlenecks.map(([code, count]) => (
+          {topCrucial.map(([code, m]) => (
             <tr key={code}>
-              <td>{code}</td>
+              <td>{code}{failed.has(code) && ' 🔁'}</td>
               <td>{COURSE_MAP[code]?.nameEn}</td>
-              <td>{count} วิชา</td>
+              <td className="num">{m.blocking}</td>
+              <td className="num">{m.delay}</td>
+              <td className="num"><strong>{m.cruciality}</strong></td>
             </tr>
           ))}
         </tbody>

@@ -42,6 +42,23 @@ x[c][t] = 1  ก็ต่อเมื่อ นักศึกษาลงทะ
    `Σ_c load(c)·x[c][t] ≤ maxLoad(hoursPerWeek) · (0.85 ถ้า honors=true)`
    (honors ลดงบภาระลง 15% เพื่อลดความเสี่ยงติด F/W)
 
+5. **Offering constraint (ภาคการศึกษาที่เปิดสอน — Srisamutr et al., 2018)**
+   `x[c][t] = 1  ⟹  sem(t) ∈ offered(c)`
+   โดย `offered(c)` มาจาก `offeredSemesters()` ใน `src/utils/scheduler.js` ตาม `offeringPolicy`:
+   `every` = ทุกเทอม (ค่าเริ่มต้น), `annual` = เฉพาะเทอมตามแผนหลักสูตร (GenEd เปิดทุกเทอม)
+   หรือ field `offered` ของรายวิชาใน `curriculum.js` ถ้ารู้ตารางเปิดสอนจริง
+
+6. **เส้นทางปี 4 (โครงงาน / สหกิจ) เลือกได้ทางเดียว**
+   `target` ตัดวิชาของเส้นทางที่ไม่ได้เลือกออก (`selectTargetCourses()` อ่านจาก `OFFICIAL_PLAN`)
+
+## ตัวชี้วัดโครงสร้างหลักสูตร (Heileman et al., 2018)
+
+ใช้จัดลำดับความสำคัญของวิชาใน greedy scheduler และ seed ของ GA (`computeCurricularComplexity()` ใน `src/utils/graph.js`)
+
+- `blocking(c)` = จำนวนวิชาที่ reach ได้จาก `c` ในกราฟ prerequisite
+- `delay(c)` = จำนวนวิชาบน path ที่ยาวที่สุดที่ผ่าน `c` = `depth(c) + height(c) + 1`
+- `cruciality(c) = blocking(c) + delay(c)`, structural complexity ของหลักสูตร = `Σ_c cruciality(c)`
+
 ## Objective Function
 
 ```
@@ -50,7 +67,8 @@ minimize:  W1 · terms_used
          − W3 · Σ_c theoretical(c)·x[c][t]·earliness(t)     (เฉพาะเมื่อ gradSchool = true)
 ```
 
-โดย `terms_used` = จำนวนเทอมที่มีวิชาถูกจัดอย่างน้อย 1 วิชา, `earliness(t)` ให้ค่าเป็นบวกมากขึ้นถ้า
+โดย `terms_used` = จำนวนเทอมตั้งแต่เทอมเริ่มถึงเทอมสุดท้ายที่มีวิชา (นับรวมเทอมที่ว่างเพราะรอวิชาเปิดสอน
+ไม่ใช่นับเฉพาะเทอมที่มีวิชา เพราะเทอมว่างก็ทำให้จบช้าจริง), `earliness(t)` ให้ค่าเป็นบวกมากขึ้นถ้า
 `t` อยู่ใกล้จุดเริ่มแผน (ผลักวิชาทฤษฎี/วิจัยให้มาเรียนเร็วขึ้นเมื่อมีเป้าหมายเรียนต่อ)
 
 ## Fallback / Constraint Relaxation

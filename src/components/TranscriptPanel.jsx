@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { COURSES, COURSE_MAP } from '../data/curriculum.js';
+import { COURSES, COURSE_MAP, termLabel } from '../data/curriculum.js';
 import { saveTranscriptRemote } from '../services/api.js';
-import { unmetPrereqs } from '../utils/scheduler.js';
+import { forecastGraduation, generateOfficialPlan, unmetPrereqs } from '../utils/scheduler.js';
 import SegmentedControl from './SegmentedControl.jsx';
 
 const STATUS_OPTIONS = [
@@ -60,6 +60,17 @@ export default function TranscriptPanel({ completed, setCompleted, failed, setFa
     () => [...completed].reduce((sum, code) => sum + (COURSE_MAP[code]?.credits ?? 0), 0),
     [completed]
   );
+
+  // ผลกระทบต่อเวลาจบทันทีที่เปลี่ยนสถานะ (อิงแผนทางการ + วิชาที่ต้องลงใหม่) — ไม่ต้องสลับไปแท็บ Dashboard
+  const forecast = useMemo(() => {
+    const { plan } = generateOfficialPlan([...completed], {
+      tracks: constraints.tracks,
+      yearPathPreference: constraints.yearPathPreference,
+      offeringPolicy: constraints.offeringPolicy,
+      retakeCodes: [...failed],
+    });
+    return forecastGraduation({ plan, completedCodes: completed, failedCodes: failed, startTerm: 11 });
+  }, [completed, failed, constraints.tracks, constraints.yearPathPreference, constraints.offeringPolicy]);
 
   async function setStatus(code, status) {
     // อัปเดต local state ทันที (ไม่ต้องรอ backend) — Dashboard คำนวณแผนใหม่ได้เลย
@@ -147,6 +158,14 @@ export default function TranscriptPanel({ completed, setCompleted, failed, setFa
           <span className="value">{completed.size}</span>
           <span className="label">วิชาที่ผ่านแล้ว</span>
         </div>
+        <div className="summary-stat">
+          <span className={`value ${forecast.onTime ? '' : 'warning'}`}>
+            {forecast.gradTerm ? termLabel(forecast.gradTerm) : '-'}
+          </span>
+          <span className="label">
+            คาดว่าจบ{forecast.onTime ? ' (ตามกำหนด)' : ` (ช้า ${forecast.delaySemesters} เทอม)`}
+          </span>
+        </div>
         <div className="summary-actions">
           <label className="hint" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: 0 }}>
             รหัสนักศึกษา (mock):
@@ -157,7 +176,7 @@ export default function TranscriptPanel({ completed, setCompleted, failed, setFa
 
       <p className="hint" style={{ marginBottom: '1rem' }}>
         เลือกสถานะแต่ละวิชา — "ตก/ถอน" จะให้ AI (KKUIntelSphere หรือ rule-based fallback) ประเมินความเสี่ยง
-        และ Dashboard (โหมด GA Optimized) จะจัดวิชานั้นไปลงใหม่ในเทอมถัดไปให้อัตโนมัติ
+        และ Dashboard จะจัดวิชานั้นไปลงใหม่ในเทอมที่เปิดสอนถัดไปให้อัตโนมัติ (ทั้งโหมด Official และ GA)
       </p>
 
       {years.map(({ year, terms }) => {

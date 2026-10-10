@@ -1,6 +1,8 @@
 import { TRACKS } from '../data/curriculum.js';
+import { ELECTIVE_SOURCES } from '../utils/scheduler.js';
 
-export default function CourseCard({ course, downstreamCount = 0, isCritical = false, retake = false }) {
+export default function CourseCard({ course, downstreamCount = 0, isCritical = false, retake = false, electiveSource }) {
+  const filled = electiveSource === 'related' || electiveSource === 'other';
   const primaryTrack = course.tracks?.[0] ? TRACKS[course.tracks[0]] : null;
   return (
     <div
@@ -22,6 +24,11 @@ export default function CourseCard({ course, downstreamCount = 0, isCritical = f
         )}
         {isCritical && <span className="badge-icon danger" title="วิชาคอขวด — อยู่บน Critical Path">⚠ คอขวด</span>}
         {retake && <span className="badge-icon warning" title="เคยตก/ถอน — ระบบจัดให้ลงใหม่ในเทอมนี้">🔁 ลงใหม่</span>}
+        {filled && (
+          <span className="badge-icon" title="วิชาเลือกของสายที่เลือกมีไม่พอ ระบบจึงเติมวิชานี้จากกลุ่มใกล้เคียง — เปลี่ยนเป็นวิชาอื่นได้">
+            ➕ {ELECTIVE_SOURCES[electiveSource]}
+          </span>
+        )}
       </div>
     </div>
   );

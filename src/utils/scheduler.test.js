@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { COURSES, COURSE_MAP } from '../data/curriculum.js';
+import { COURSES, COURSE_MAP, TRACKS } from '../data/curriculum.js';
 import { computeDownstreamCounts } from './graph.js';
 import { OFFICIAL_PLAN } from '../data/officialPlan.js';
 import {
@@ -11,6 +11,8 @@ import {
   prereqsSatisfied,
   unmetPrereqs,
   REQUIRED_CATEGORIES,
+  forecastGraduation,
+  isOffered,
 } from './scheduler.js';
 
 describe('loadBudgetFromHours', () => {
@@ -40,6 +42,53 @@ describe('selectTargetCourses', () => {
     [...targetCodes]
       .filter((code) => COURSE_MAP[code].category.startsWith('Elective'))
       .forEach((code) => expect(COURSE_MAP[code].tracks).toContain('AI'));
+  });
+
+  // บั๊กเดิม: สาย FRONTEND/SECURITY/GAMEDEV/MOBILE/FULLSTACK มีวิชาเลือกติดป้ายแค่ 6–12 หน่วยกิต แผนจึงไม่ครบเกณฑ์จบ
+  it.each(Object.keys(TRACKS))('reaches the 15-credit elective goal for track %s', (track) => {
+    const { targetCodes, electiveCreditTotal, electiveSource } = selectTargetCourses(new Set(), { tracks: [track], electiveCreditGoal: 15 });
+    expect(electiveCreditTotal).toBeGreaterThanOrEqual(15);
+    const electives = [...targetCodes].filter((code) => COURSE_MAP[code].category.startsWith('Elective'));
+    // วิชาเลือกที่มี prereq เป็นวิชาเลือก ต้องมีตัวก่อนหน้าอยู่ในแผนด้วย ไม่งั้นวางแผนไม่ได้
+    electives.forEach((code) => COURSE_MAP[code].prereq
+      .filter((p) => COURSE_MAP[p]?.category.startsWith('Elective'))
+      .forEach((p) => expect(targetCodes.has(p)).toBe(true)));
+    // ใช้วิชาของสายตัวเองก่อนเติมจากกลุ่มอื่นเสมอ
+    const trackCodes = COURSES.filter((c) => c.category.startsWith('Elective') && c.tracks.includes(track)).map((c) => c.code);
+    const usedFiller = Object.values(electiveSource).some((s) => s === 'related' || s === 'other');
+    if (usedFiller) trackCodes.forEach((code) => expect(electiveSource[code]).toBe('primary'));
+  });
+
+  it('fills electives from the primary track before the secondary one', () => {
+    const { electiveSource } = selectTargetCourses(new Set(), { tracks: ['SECURITY', 'DEVOPS'], electiveCreditGoal: 15 });
+    expect(Object.values(electiveSource).filter((s) => s === 'primary')).toHaveLength(3);
+    expect(Object.values(electiveSource)).toContain('secondary');
+    expect(Object.values(electiveSource)).not.toContain('related');
+  });
+
+  it('accepts the legacy single `track` option', () => {
+    const legacy = selectTargetCourses(new Set(), { track: 'AI', electiveCreditGoal: 15 });
+    const current = selectTargetCourses(new Set(), { tracks: ['AI'], electiveCreditGoal: 15 });
+    expect([...legacy.targetCodes]).toEqual([...current.targetCodes]);
+  });
+});
+
+describe('elective warnings', () => {
+  it('tells the student which electives were filled from related groups', () => {
+    const { warnings } = generatePlan([], { tracks: ['MOBILE'], hoursPerWeek: 20 });
+    expect(warnings.some((w) => w.type === 'filled')).toBe(true);
+    expect(warnings.some((w) => w.type === 'unresolved')).toBe(false);
+  });
+
+  it('warns when no track is chosen', () => {
+    const { warnings } = generatePlan([], { hoursPerWeek: 20 });
+    expect(warnings.some((w) => w.message.includes('ยังไม่ได้เลือกสายอาชีพ'))).toBe(true);
+  });
+
+  it('fills every elective slot of the official plan for a short track', () => {
+    const { plan, electiveSource } = generateOfficialPlan([], { tracks: ['GAMEDEV'] });
+    expect(plan.filter((t) => t.term <= 32).every((t) => !t.electivePlaceholderCredits)).toBe(true);
+    expect(Object.values(electiveSource)).toContain('related');
   });
 });
 
@@ -199,5 +248,69 @@ describe('generateOfficialPlan — delay pushing past the standard 4-year plan',
     const cp2 = plan.find((t) => t.courses.some((c) => c.code === 'CP354772'));
     expect(cp2.term).toBe(51);
     expect(warnings.some((w) => w.type === 'extended')).toBe(true);
+  });
+});
+
+describe('selectTargetCourses — year-4 path (โครงงาน vs สหกิจ ลงได้ทางเดียว)', () => {
+  const targets = (yearPathPreference) =>
+    selectTargetCourses(new Set(), { track: null, electiveCreditGoal: 0, yearPathPreference }).targetCodes;
+
+  it('project path includes Project I/II but not co-op courses', () => {
+    const t = targets('project');
+    expect(t.has('CP354771')).toBe(true);
+    expect(t.has('CP354772')).toBe(true);
+    expect(t.has('CP354785')).toBe(false);
+    expect(t.has('CP002001')).toBe(false);
+  });
+
+  it('coop_early path includes co-op + orientation but no project courses', () => {
+    const t = targets('coop_early');
+    expect(t.has('CP354785')).toBe(true);
+    expect(t.has('CP002001')).toBe(true);
+    expect(t.has('CP354771')).toBe(false);
+    expect(t.has('CP354772')).toBe(false);
+  });
+});
+
+describe('offering policy (ภาคการศึกษาที่เปิดสอน)', () => {
+  it('annual policy: failing a semester-1 core course delays the retake by a full year', () => {
+    const every = computeShiftedTerms(new Set(), new Set(['CP352001']), 'project', 'every');
+    const annual = computeShiftedTerms(new Set(), new Set(['CP352001']), 'project', 'annual');
+    expect(every.effTerm.CP352001).toBe(22);
+    expect(annual.effTerm.CP352001).toBe(31);
+  });
+
+  it('annual policy keeps GenEd retakes at the very next semester', () => {
+    const { effTerm } = computeShiftedTerms(new Set(), new Set(['LI101001']), 'project', 'annual');
+    expect(effTerm.LI101001).toBe(12);
+  });
+
+  it('greedy planner only schedules a course in a semester it is offered', () => {
+    const { plan } = generatePlan([], { track: 'DATA', hoursPerWeek: 30, offeringPolicy: 'annual' });
+    plan.forEach((t) => t.courses.forEach((c) => expect(isOffered(c, t.term, 'annual')).toBe(true)));
+  });
+});
+
+describe('forecastGraduation', () => {
+  it('reports on-time graduation for the untouched official plan', () => {
+    const { plan } = generateOfficialPlan([], { yearPathPreference: 'project' });
+    const f = forecastGraduation({ plan, completedCodes: [], startTerm: 11 });
+    expect(f.gradTerm).toBe(42);
+    expect(f.onTime).toBe(true);
+    expect(f.honorsEligible).toBe(true);
+  });
+
+  it('reports a delay (and lost honors eligibility) when Project I is retaken', () => {
+    const completedThroughYear3 = COURSES.filter((c) => (c.term ?? 99) <= 32).map((c) => c.code);
+    const { plan } = generateOfficialPlan(completedThroughYear3, { retakeCodes: ['CP354771'] });
+    const f = forecastGraduation({
+      plan,
+      completedCodes: completedThroughYear3,
+      failedCodes: ['CP354771'],
+      startTerm: 41,
+    });
+    expect(f.onTime).toBe(false);
+    expect(f.delaySemesters).toBe(1);
+    expect(f.honorsEligible).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { COURSES, COURSE_MAP } from '../../src/data/curriculum.js';
-import { prereqsSatisfied, DEFAULT_OPTIONS, selectTargetCourses } from '../../src/utils/scheduler.js';
+import { prereqsSatisfied, DEFAULT_OPTIONS, selectTargetCourses, isOffered } from '../../src/utils/scheduler.js';
 import { decodeChromosome, runGA, scoreFitness } from './ga.js';
 
 function randomChromosome(codes) {
@@ -94,6 +94,38 @@ describe('runGA — dynamic re-planning for failed/retake courses', () => {
     expect(cal1Index).toBeGreaterThanOrEqual(0);
     expect(cal2Index).toBeGreaterThan(cal1Index);
     expect(cal1Index).toBe(0); // ไม่มี prereq ของตัวเอง + มี retake bonus -> ควรได้เทอมแรกเสมอ
+  });
+});
+
+describe('GA — offering constraint, gap terms and reproducibility', () => {
+  it('decoder never places a course in a semester it is not offered (annual policy)', () => {
+    const opts = { ...DEFAULT_OPTIONS, track: 'DEVOPS', hoursPerWeek: 20, offeringPolicy: 'annual' };
+    const genes = [...selectTargetCourses(new Set(), opts).targetCodes];
+    for (let trial = 0; trial < 5; trial += 1) {
+      const { plan } = decodeChromosome(randomChromosome(genes), [], opts);
+      plan.forEach((t) => t.courses.forEach((c) => expect(isOffered(c, t.term, 'annual')).toBe(true)));
+    }
+  });
+
+  it('scoreFitness counts empty waiting semesters toward time-to-degree', () => {
+    const course = { code: 'X', load: 2 };
+    const opts = { startTerm: 11 };
+    const contiguous = { plan: [{ term: 11, courses: [course], load: 2 }, { term: 12, courses: [course], load: 2 }], relaxations: 0 };
+    const withGap = { plan: [{ term: 11, courses: [course], load: 2 }, { term: 21, courses: [course], load: 2 }], relaxations: 0 };
+    expect(scoreFitness(contiguous, opts, 2)).toBeGreaterThan(scoreFitness(withGap, opts, 2));
+  });
+
+  it('same seed -> identical plan', () => {
+    const run = () => runGA([], { track: 'AI', populationSize: 15, generations: 10, seed: 42 });
+    const codes = (r) => r.plan.map((t) => t.courses.map((c) => c.code).join(','));
+    expect(codes(run())).toEqual(codes(run()));
+  });
+
+  it('never schedules both the project and the co-op path', () => {
+    const result = runGA([], { track: 'FULLSTACK', yearPathPreference: 'project', populationSize: 10, generations: 5, seed: 1 });
+    const scheduled = new Set(result.plan.flatMap((t) => t.courses.map((c) => c.code)));
+    expect(scheduled.has('CP354772')).toBe(true);
+    expect(scheduled.has('CP354785')).toBe(false);
   });
 });
 

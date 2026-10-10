@@ -11,13 +11,17 @@
 // hard constraint เสมอ ผลลัพธ์ที่ decode ออกมาจึง "ไม่มีทางละเมิด prerequisite/credit-cap/load-cap"
 // ไม่ว่า chromosome จะเป็นลำดับอะไรก็ตาม — GA จึงค้นหาแค่ "ลำดับที่ดีที่สุด" ไม่ต้อง repair solution
 import { COURSES } from '../../src/data/curriculum.js';
-import { computeDownstreamCounts } from '../../src/utils/graph.js';
+import { computeCurricularComplexity, computeDownstreamCounts } from '../../src/utils/graph.js';
 import {
   DEFAULT_OPTIONS,
-  loadBudgetFromHours,
+  electiveWarnings,
+  isOffered,
+  loadBudget,
   nextTerm,
+  normalizeTracks,
   prereqsSatisfied,
   selectTargetCourses,
+  termIndex,
 } from '../../src/utils/scheduler.js';
 
 const COURSE_MAP = Object.fromEntries(COURSES.map((c) => [c.code, c]));
@@ -31,8 +35,7 @@ const MAX_LOAD_RELAXATIONS = 6;
 export function decodeChromosome(chromosome, completedCodes, opts) {
   const completed = new Set(completedCodes);
   const remaining = new Set(chromosome);
-  const baseLoad = loadBudgetFromHours(opts.hoursPerWeek);
-  let maxLoad = opts.honors ? Math.round(baseLoad * 0.85) : baseLoad;
+  let maxLoad = loadBudget(opts);
 
   const plan = [];
   const warnings = [];
@@ -43,9 +46,16 @@ export function decodeChromosome(chromosome, completedCodes, opts) {
 
   while (remaining.size > 0 && guard < hardCap) {
     guard += 1;
-    const eligible = chromosome.filter(
+    const prereqReady = chromosome.filter(
       (code) => remaining.has(code) && prereqsSatisfied(COURSE_MAP[code], completed)
     );
+    const eligible = prereqReady.filter((code) => isOffered(COURSE_MAP[code], term, opts.offeringPolicy));
+
+    if (eligible.length === 0 && prereqReady.length > 0) {
+      // วิชาที่ลงได้ยังไม่เปิดสอนเทอมนี้ (offering constraint) — ข้ามไปเทอมถัดไป ไม่ต้อง relax load
+      term = nextTerm(term);
+      continue;
+    }
 
     const termCourses = [];
     let termCredits = 0;
@@ -62,9 +72,7 @@ export function decodeChromosome(chromosome, completedCodes, opts) {
     }
 
     if (termCourses.length === 0) {
-      const blockedByPrereq = [...remaining].some(
-        (code) => !prereqsSatisfied(COURSE_MAP[code], completed)
-      );
+      const blockedByPrereq = eligible.length === 0;
       if (!blockedByPrereq && relaxations < MAX_LOAD_RELAXATIONS) {
         maxLoad += 2;
         relaxations += 1;
@@ -110,7 +118,11 @@ export function scoreFitness(decoded, opts, targetCount, downstreamCounts) {
   const { plan, relaxations } = decoded;
   const scheduledCount = plan.reduce((s, t) => s + t.courses.length, 0);
   const unresolved = Math.max(0, targetCount - scheduledCount);
-  const termsUsed = plan.length || 1;
+  // นับ "จำนวนเทอมจนจบ" จากเทอมเริ่มถึงเทอมสุดท้าย ไม่ใช่ plan.length — เทอมที่ว่างเพราะรอวิชาเปิดสอน
+  // ก็ยังกินเวลาจบจริง (ถ้านับแค่ plan.length GA จะมองไม่เห็นความล่าช้านี้)
+  const baseIdx = termIndex(opts.startTerm ?? plan[0]?.term ?? 11);
+  const offsetOf = (t) => termIndex(t.term) - baseIdx;
+  const termsUsed = plan.length ? offsetOf(plan[plan.length - 1]) + 1 : 1;
 
   const loads = plan.map((t) => t.load);
   const meanLoad = loads.reduce((s, l) => s + l, 0) / (loads.length || 1);
@@ -124,9 +136,9 @@ export function scoreFitness(decoded, opts, targetCount, downstreamCounts) {
 
   if (opts.gradSchool) {
     let bonus = 0;
-    plan.forEach((termPlan, idx) => {
+    plan.forEach((termPlan) => {
       termPlan.courses.forEach((c) => {
-        if (c.theoretical) bonus += Math.max(0, termsUsed - idx); // ยิ่งเรียนเร็วยิ่งได้โบนัสเยอะ
+        if (c.theoretical) bonus += Math.max(0, termsUsed - offsetOf(termPlan)); // ยิ่งเรียนเร็วยิ่งได้โบนัสเยอะ
       });
     });
     score += bonus * 2;
@@ -138,11 +150,11 @@ export function scoreFitness(decoded, opts, targetCount, downstreamCounts) {
   // แต่ "เร็วแค่ไหน x กระทบกว้างแค่ไหน" ถึงจะสะท้อน priority ที่ถูกต้อง
   if (opts.retakeCodes?.size) {
     let retakeBonus = 0;
-    plan.forEach((termPlan, idx) => {
+    plan.forEach((termPlan) => {
       termPlan.courses.forEach((c) => {
         if (opts.retakeCodes.has(c.code)) {
           const dependentWeight = 1 + (downstreamCounts?.[c.code] ?? 0) * 0.5;
-          retakeBonus += Math.max(0, termsUsed - idx) * dependentWeight;
+          retakeBonus += Math.max(0, termsUsed - offsetOf(termPlan)) * dependentWeight;
         }
       });
     });
@@ -152,19 +164,33 @@ export function scoreFitness(decoded, opts, targetCount, downstreamCounts) {
   return score;
 }
 
-function shuffle(arr) {
+// Seeded PRNG (mulberry32) — ใส่ options.seed แล้วผล GA จะ reproducible สำหรับการทดลองในเล่มวิจัย
+// ไม่ใส่ seed = ใช้ Math.random ตามเดิม
+function makeRng(seed) {
+  if (seed === undefined || seed === null) return Math.random;
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffle(arr, rng) {
   for (let i = arr.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(rng() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
 }
 
 // Order Crossover (OX) — มาตรฐานสำหรับ permutation-based GA (รักษาความเป็น permutation ของลูก)
-function orderCrossover(p1, p2) {
+function orderCrossover(p1, p2, rng) {
   const len = p1.length;
-  const a = Math.floor(Math.random() * len);
-  const b = Math.floor(Math.random() * len);
+  const a = Math.floor(rng() * len);
+  const b = Math.floor(rng() * len);
   const [start, end] = a < b ? [a, b] : [b, a];
 
   const child = new Array(len).fill(null);
@@ -181,10 +207,10 @@ function orderCrossover(p1, p2) {
   return child;
 }
 
-function swapMutate(chromosome) {
+function swapMutate(chromosome, rng) {
   const c = [...chromosome];
-  const i = Math.floor(Math.random() * c.length);
-  const j = Math.floor(Math.random() * c.length);
+  const i = Math.floor(rng() * c.length);
+  const j = Math.floor(rng() * c.length);
   [c[i], c[j]] = [c[j], c[i]];
   return c;
 }
@@ -205,8 +231,15 @@ export function runGA(completedCodes = [], options = {}) {
     retakeCodes: new Set(options.retakeCodes ?? []),
   };
 
+  const rng = makeRng(options.seed);
   const completedSet = new Set(completedCodes);
-  const { targetCodes, electiveCreditTotal } = selectTargetCourses(completedSet, opts);
+  const { targetCodes, electiveCreditTotal, electiveSource } = selectTargetCourses(completedSet, opts);
+  const selectionWarnings = electiveWarnings({
+    tracks: normalizeTracks(opts),
+    electiveSource,
+    electiveCreditTotal,
+    electiveCreditGoal: opts.electiveCreditGoal,
+  });
   const genes = [...targetCodes];
 
   if (genes.length === 0) {
@@ -214,20 +247,22 @@ export function runGA(completedCodes = [], options = {}) {
       plan: [],
       warnings: [],
       electiveCreditTotal,
-      maxLoad: loadBudgetFromHours(opts.hoursPerWeek),
+      electiveSource,
+      maxLoad: loadBudget(opts),
       meta: { method: 'ga', generations: 0, note: 'ไม่มีวิชาเหลือให้วางแผน (เรียนครบแล้ว)' },
     };
   }
 
   const downstreamCounts = computeDownstreamCounts();
-  // seed แรกให้ความสำคัญกับวิชาที่ต้องลงใหม่ก่อนเสมอ ก่อนจะเรียงตาม downstream count เหมือนเดิม
+  const { byCourse } = computeCurricularComplexity();
+  // seed แรกให้ความสำคัญกับวิชาที่ต้องลงใหม่ก่อนเสมอ แล้วเรียงตาม cruciality (blocking + delay factor)
   const greedySeed = [...genes].sort((a, b) => {
     const retakeDiff = (opts.retakeCodes.has(b) ? 1 : 0) - (opts.retakeCodes.has(a) ? 1 : 0);
     if (retakeDiff !== 0) return retakeDiff;
-    return (downstreamCounts[b] ?? 0) - (downstreamCounts[a] ?? 0);
+    return (byCourse[b]?.cruciality ?? 0) - (byCourse[a]?.cruciality ?? 0);
   });
 
-  let population = [greedySeed, ...Array.from({ length: opts.populationSize - 1 }, () => shuffle([...genes]))];
+  let population = [greedySeed, ...Array.from({ length: opts.populationSize - 1 }, () => shuffle([...genes], rng))];
 
   let best = null;
   let bestScore = -Infinity;
@@ -252,10 +287,10 @@ export function runGA(completedCodes = [], options = {}) {
 
     const nextPop = [...elites];
     while (nextPop.length < opts.populationSize) {
-      const p1 = parents[Math.floor(Math.random() * parents.length)];
-      const p2 = parents[Math.floor(Math.random() * parents.length)];
-      let child = orderCrossover(p1, p2);
-      if (Math.random() < opts.mutationRate) child = swapMutate(child);
+      const p1 = parents[Math.floor(rng() * parents.length)];
+      const p2 = parents[Math.floor(rng() * parents.length)];
+      let child = orderCrossover(p1, p2, rng);
+      if (rng() < opts.mutationRate) child = swapMutate(child, rng);
       nextPop.push(child);
     }
     population = nextPop;
@@ -263,13 +298,15 @@ export function runGA(completedCodes = [], options = {}) {
 
   return {
     plan: best.decoded.plan,
-    warnings: best.decoded.warnings,
+    warnings: [...selectionWarnings, ...best.decoded.warnings],
     electiveCreditTotal,
+    electiveSource,
     maxLoad: best.decoded.maxLoad,
     meta: {
       method: 'ga',
       generations: opts.generations,
       populationSize: opts.populationSize,
+      seed: options.seed ?? null,
       bestScore,
       relaxations: best.decoded.relaxations,
     },

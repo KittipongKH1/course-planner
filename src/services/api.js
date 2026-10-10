@@ -19,8 +19,8 @@ export function extractIntentRemote(text) {
 }
 
 /** @returns {Promise<object>} plan result shape เดียวกับ generatePlan/generateOfficialPlan/runGA */
-export function generatePlanRemote({ completed, constraints, method }) {
-  return postJSON('/plan/generate', { completed, constraints, method });
+export function generatePlanRemote({ completed, failed, constraints, method }) {
+  return postJSON('/plan/generate', { completed, failed, constraints, method });
 }
 
 /** @returns {Promise<{records, analysis}>} */
